@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+docling
+python-multipart
+pillow
+PyMuPDF 
+uvicorn
+
+    #  python -m uvicorn main:app --reload

@@ -1,0 +1,194 @@
+[
+  {
+    "self_ref": "#/texts/173",
+    "type": "text",
+    "content": "By breaking down the runtimes to a page level, we receive a more intuitive measure for the conversion speed (see also Figure 4). Processing a page in our benchmark dataset requires between 0.6 sec (5 th percentile) and 16.3 sec (95 th percentile), with a median of 0.79 sec on the x86 CPU. On the M3 Max SoC, it achieves 0.26/0.32/6.48 seconds per page (.05/median/.95), and on the Nvidia L4 GPU it achieves 57/114/2081 milliseconds per page (.05/median/.95). The large range between 5 and 95 percentiles results from the highly different complexity of content across pages (i.e., almost empty pages vs. full-page tables).",
+    "page": 6,
+    "bbox": {
+      "left": 54.0,
+      "top": 734.523,
+      "right": 292.505,
+      "bottom": 704.054
+    }
+  },
+  {
+    "self_ref": "#/texts/174",
+    "type": "text",
+    "content": "Disabling OCR saves 60% of runtime on the x86 CPU and the M3 Max SoC, and 50% on the L4 GPU. Turning off table structure recognition saves 16% of runtime on the x86 CPU and the M3 Max SoC, and 24% on the L4 GPU. Disabling both OCR and table structure recognition saves around 75% of runtime on all system configurations.",
+    "page": 6,
+    "bbox": {
+      "left": 54.0,
+      "top": 699.525,
+      "right": 292.505,
+      "bottom": 636.178
+    }
+  },
+  {
+    "self_ref": "#/texts/175",
+    "type": "text",
+    "content": "Profiling Docling's AI Pipeline We analyzed the contributions of Docling's PDF backend and all AI models in the PDF pipeline to the total conversion time. The results are shown in Figure 4. On average, processing a page took 481 ms on the L4 GPU, 3.1 s on the x86 CPU and 1.26 s on the M3 Max SoC.",
+    "page": 6,
+    "bbox": {
+      "left": 54.0,
+      "top": 621.815,
+      "right": 292.505,
+      "bottom": 558.081
+    }
+  },
+  {
+    "self_ref": "#/texts/176",
+    "type": "text",
+    "content": "It is evident that applying OCR is the most expensive operation. In our benchmark dataset, OCR engages in 578 pages. On average, transcribing a page with EasyOCR took 1.6 s on the L4 GPU, 13 s on the x86 CPU and 5 s on the M3 Max SoC. The layout model spent 44 ms on the L4 GPU, 633 ms on the x86 CPU and 271 ms on the M3 Max SoC on average for each page, making it the cheapest of the AI models, while TableFormer (fast flavour) spent 400 ms on the L4 GPU, 1.74 s on the x86 CPU and 704 ms on the M3 Max SoC on average per table. Regarding the total time spent converting our benchmark dataset, TableFormer had less impact than other AI models, since tables appeared on only 28% of all pages (see Figure 4).",
+    "page": 6,
+    "bbox": {
+      "left": 54.0,
+      "top": 553.552,
+      "right": 292.505,
+      "bottom": 413.493
+    }
+  },
+  {
+    "self_ref": "#/texts/177",
+    "type": "text",
+    "content": "On the L4 GPU, we observe a speedup of 8x (OCR), 14x (Layout model) and 4.3x (Table structure) compared to the x86 CPU and a speedup of 3x (OCR), 6x (Layout model) and 1.7x (Table structure) compared to the M3 Max CPU of our MacBook Pro. This shows that there is no equal benefit for all AI models from the GPU acceleration and there might be potential for optimization.",
+    "page": 6,
+    "bbox": {
+      "left": 54.0,
+      "top": 408.964,
+      "right": 292.505,
+      "bottom": 334.659
+    }
+  },
+  {
+    "self_ref": "#/texts/178",
+    "type": "text",
+    "content": "The time spent in parsing a PDF page through our docling-parse backend is substantially lower in comparison to the AI models. On average, parsing a PDF page took 81 ms on the x86 CPU and 44 ms on the M3 Max SoC (there is no GPU support).",
+    "page": 6,
+    "bbox": {
+      "left": 54.0,
+      "top": 330.13,
+      "right": 292.505,
+      "bottom": 277.74199999999996
+    }
+  },
+  {
+    "self_ref": "#/texts/179",
+    "type": "text",
+    "content": "Comparison to Other Tools We compare the average times to convert a page between Docling, Marker, MinerU, and Unstructured on the system configurations outlined in section 5.2. Results are shown in Figure 5.",
+    "page": 6,
+    "bbox": {
+      "left": 54.0,
+      "top": 263.38,
+      "right": 292.505,
+      "bottom": 221.563
+    }
+  },
+  {
+    "self_ref": "#/texts/180",
+    "type": "text",
+    "content": "Without GPU support, Docling leads with 3.1 sec/page (x86 CPU) and 1.27 sec/page (M3 Max SoC), followed closely by MinerU (3.3 sec/page on x86 CPU) and Unstructured (4.2 sec/page on x86 CPU, 2.7 sec/page on M3 Max SoC), while Marker needs over 16 sec/page (x86 CPU) and 4.2 sec/page (M3 Mac SoC). MinerU, despite several efforts to configure its environment, did not finish any run on our MacBook Pro M3 Max. With CUDA acceleration on the Nvidia L4 GPU, the picture changes and MinerU takes the lead over the contenders with 0.21 sec/page, compared to 0.49 sec/page with Docling and 0.86 sec/page with Marker. Unstructured does not profit from GPU acceleration.",
+    "page": 6,
+    "bbox": {
+      "left": 54.0,
+      "top": 217.034,
+      "right": 292.505,
+      "bottom": 87.93399999999997
+    }
+  },
+  {
+    "self_ref": "#/texts/181",
+    "type": "text",
+    "content": "6 Applications",
+    "page": 6,
+    "bbox": {
+      "left": 397.714,
+      "top": 736.286,
+      "right": 479.786,
+      "bottom": 725.538
+    }
+  },
+  {
+    "self_ref": "#/texts/182",
+    "type": "text",
+    "content": "Docling's document extraction capabilities make it naturally suitable for workflows like generative AI applications (e.g., RAG), data preparation for foundation model training, and fine-tuning, as well as information extraction.",
+    "page": 6,
+    "bbox": {
+      "left": 319.5,
+      "top": 719.125,
+      "right": 558.005,
+      "bottom": 677.697
+    }
+  },
+  {
+    "self_ref": "#/texts/183",
+    "type": "text",
+    "content": "As far as RAG is concerned, users can leverage existing Docling extensions for popular frameworks like LlamaIndex and then harness framework capabilities for RAG components like embedding models, vector stores, etc. These Docling extensions typically provide two modes of operation: one using a lossy export, e.g., to Markdown, and one using lossless serialization via JSON. The former provides a simple starting point, upon which any text-based chunking method may be applied (e.g., also drawing from the framework library), while the latter, which uses a swappable Docling chunker type, can be the more powerful one, as it can provide document-native RAG grounding via rich metadata such as the page number and the bounding box of the supporting context. For usage outside of these frameworks, users can still employ Docling chunkers to accelerate and simplify the development of their custom pipelines. Besides strict RAG pipelines for Q&A, Docling can naturally be utilized in the context of broader agentic workflows for which it can provide document-based knowledge for agents to decide and act on.",
+    "page": 6,
+    "bbox": {
+      "left": 319.5,
+      "top": 674.806,
+      "right": 558.005,
+      "bottom": 458.035
+    }
+  },
+  {
+    "self_ref": "#/texts/184",
+    "type": "text",
+    "content": "Moreover, Docling-enabled pipelines can generate ground truth data out of documents. Such domain-specific knowledge can make significant impact when infused to foundation model training and fine-tuning.",
+    "page": 6,
+    "bbox": {
+      "left": 319.5,
+      "top": 455.145,
+      "right": 558.005,
+      "bottom": 413.716
+    }
+  },
+  {
+    "self_ref": "#/texts/185",
+    "type": "text",
+    "content": "Last but not least, Docling can be used as a backbone for information extraction tasks. Users who seek to create structured representations out of unstructured documents can leverage Docling, which maps various document formats to the unified DoclingDocument format, as well as its strong table understanding capabilities that can help better analyze semi-structured document parts.",
+    "page": 6,
+    "bbox": {
+      "left": 319.5,
+      "top": 410.826,
+      "right": 558.005,
+      "bottom": 336.52
+    }
+  },
+  {
+    "self_ref": "#/texts/186",
+    "type": "text",
+    "content": "7 Ecosystem",
+    "page": 6,
+    "bbox": {
+      "left": 402.891,
+      "top": 322.35,
+      "right": 474.61,
+      "bottom": 311.602
+    }
+  },
+  {
+    "self_ref": "#/texts/187",
+    "type": "text",
+    "content": "Docling is quickly evolving into a mainstream package for document conversion. The support for PDF, MS Office formats, Images, HTML, and more makes it a universal choice for downstream applications. Users appreciate the intuitiveness of the library, the high-quality, richly structured conversion output, as well as the permissive MIT license, and the possibility of running entirely locally on commodity hardware.",
+    "page": 6,
+    "bbox": {
+      "left": 319.5,
+      "top": 305.189,
+      "right": 558.005,
+      "bottom": 219.92499999999995
+    }
+  },
+  {
+    "self_ref": "#/texts/188",
+    "type": "text",
+    "content": "Among the integrations created by the Docling team and the growing community, a few are worth mentioning as depicted in Figure 6. For popular generative AI application patterns, we provide native integration within LangChain (Chase 2022) and LlamaIndex (Liu 2022) for reading documents and chunking. Processing and transforming documents at scale for building large-scale multi-modal training datasets are enabled by the integration in the open IBM data-prep-kit (Wood et al. 2024). Agentic workloads can leverage the integration with the Bee framework (IBM Research 2024). For the fine-tuning of language models, Docling is integrated in InstructLab (Sudalairaj et al. 2024),",
+    "page": 6,
+    "bbox": {
+      "left": 319.5,
+      "top": 217.034,
+      "right": 558.005,
+      "bottom": 87.93399999999997
+    }
+  }
+]

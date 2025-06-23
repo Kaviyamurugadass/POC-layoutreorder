@@ -1,0 +1,206 @@
+[
+  {
+    "self_ref": "#/texts/95",
+    "type": "text",
+    "content": "Each document is first parsed by a PDF backend, which retrieves the programmatic text tokens, consisting of string content and its coordinates on the page, and also renders a bitmap image of each page to support downstream operations. Any image format input is wrapped in a PDF container on the fly, and proceeds through the pipeline as a scanned PDF document. Then, the standard PDF pipeline applies a sequence of AI models independently on every page of the document to extract features and content, such as layout and table structures. Finally, the results from all pages are aggregated and passed through a post-processing stage, which eventually assembles the DoclingDocument representation.",
+    "page": 4,
+    "bbox": {
+      "left": 54.0,
+      "top": 734.523,
+      "right": 292.505,
+      "bottom": 649.259
+    }
+  },
+  {
+    "self_ref": "#/texts/96",
+    "type": "text",
+    "content": "4.1 AI Models",
+    "page": 4,
+    "bbox": {
+      "left": 54.0,
+      "top": 632.266,
+      "right": 127.331,
+      "bottom": 622.459
+    }
+  },
+  {
+    "self_ref": "#/texts/97",
+    "type": "text",
+    "content": "As part of Docling, we release two highly capable AI models to the open-source community, which have been developed and published recently by our team. The first model is a layout analysis model, an accurate object detector for page elements (Pfitzmann et al. 2022). The second model is TableFormer (Nassar et al. 2022; Lysak et al. 2023), a state-of-the-art table structure recognition model. We provide the pre-trained weights (hosted on Hugging Face) and a separate Python package for the inference code ( doclingibm-models ).",
+    "page": 4,
+    "bbox": {
+      "left": 54.0,
+      "top": 612.049,
+      "right": 292.505,
+      "bottom": 504.867
+    }
+  },
+  {
+    "self_ref": "#/texts/98",
+    "type": "text",
+    "content": "Layout Analysis Model Our layout analysis model is an object detector which predicts the bounding-boxes and classes of various elements on the image of a given page. Its architecture is derived from RT-DETR (Zhao et al. 2023) and re-trained on DocLayNet (Pfitzmann et al. 2022), our popular human-annotated dataset for document-layout analysis, among other proprietary datasets. For inference, our implementation relies on the Hugging Face transformers (Wolf et al. 2020) library and the Safetensors file format. All predicted bounding-box proposals for document elements are post-processed to remove overlapping proposals based on confidence and size, and then intersected with the text tokens in the PDF to group them into meaningful and complete units such as paragraphs, section titles, list items, captions, figures, or tables.",
+    "page": 4,
+    "bbox": {
+      "left": 54.0,
+      "top": 491.642,
+      "right": 292.505,
+      "bottom": 329.277
+    }
+  },
+  {
+    "self_ref": "#/texts/99",
+    "type": "text",
+    "content": "Table Structure Recognition The TableFormer model (Nassar et al. 2022), first published in 2022 and since refined with a custom structure token language (Lysak et al. 2023), is a vision-transformer model for table structure recovery. It can predict the logical row and column structure of a given table based on an input image, and determine which table cells belong to column headers, row headers or the table body. Compared to earlier approaches, TableFormer handles many characteristics of tables like partial or no borderlines, empty cells, rows or columns, cell spans and hierarchy on both column-heading and row-heading level, tables with inconsistent indentation or alignment and other complexities. For inference, our implementation relies on PyTorch (Ansel et al. 2024). The PDF pipeline feeds all table objects detected in the layout analysis to the TableFormer model, by providing an image-crop of the table and the included text cells. TableFormer structure predictions are matched back to the PDF cells during a post-processing step, to avoid expensive re-transcription of the table image-crop, which also makes the TableFormer model language agnostic.",
+    "page": 4,
+    "bbox": {
+      "left": 54.0,
+      "top": 316.052,
+      "right": 292.505,
+      "bottom": 87.93399999999997
+    }
+  },
+  {
+    "self_ref": "#/texts/100",
+    "type": "text",
+    "content": "OCR Docling utilizes OCR to convert scanned PDFs and extract content from bitmaps images embedded in a page. Currently, we provide integration with EasyOCR (eas 2024), a popular third-party OCR library with support for many languages, and Tesseract as a widely available alternative. While EasyOCR delivers reasonable transcription quality, we observe that it runs fairly slow on CPU (see section 5), making it the biggest compute expense in the pipeline.",
+    "page": 4,
+    "bbox": {
+      "left": 319.5,
+      "top": 734.911,
+      "right": 558.005,
+      "bottom": 649.259
+    }
+  },
+  {
+    "self_ref": "#/texts/101",
+    "type": "text",
+    "content": "Assembly In the final pipeline stage, Docling assembles all prediction results produced on each page into the DoclingDocument representation, as defined in the auxiliary Python package docling-core . The generated document object is passed through a post-processing model which leverages several algorithms to augment features, such as correcting the reading order or matching figures with captions.",
+    "page": 4,
+    "bbox": {
+      "left": 319.5,
+      "top": 640.126,
+      "right": 558.005,
+      "bottom": 565.433
+    }
+  },
+  {
+    "self_ref": "#/texts/102",
+    "type": "text",
+    "content": "5 Performance",
+    "page": 4,
+    "bbox": {
+      "left": 396.859,
+      "top": 551.603,
+      "right": 480.641,
+      "bottom": 540.855
+    }
+  },
+  {
+    "self_ref": "#/texts/103",
+    "type": "text",
+    "content": "In this section, we characterize the conversion speed of PDF documents with Docling in a given resource budget for different scenarios and establish reference numbers.",
+    "page": 4,
+    "bbox": {
+      "left": 319.5,
+      "top": 534.756,
+      "right": 558.005,
+      "bottom": 504.286
+    }
+  },
+  {
+    "self_ref": "#/texts/104",
+    "type": "text",
+    "content": "Further, we compare the conversion speed to three popular contenders in the open-source space, namely unstructured.io (Unstructured.io Team 2024), Marker (Paruchuri 2024), and MinerU (Wang et al. 2024). All aforementioned solutions can universally convert PDF documents to Markdown or similar representations and offer a library-style interface to run the document processing entirely locally. We exclude SaaS offerings and remote services for document conversion from this comparison, since the latter do not provide any possibility to control the system resources they run on, rendering any speed comparison invalid.",
+    "page": 4,
+    "bbox": {
+      "left": 319.5,
+      "top": 501.501,
+      "right": 558.005,
+      "bottom": 383.36
+    }
+  },
+  {
+    "self_ref": "#/texts/105",
+    "type": "text",
+    "content": "5.1 Benchmark Dataset",
+    "page": 4,
+    "bbox": {
+      "left": 319.5,
+      "top": 370.8,
+      "right": 436.456,
+      "bottom": 360.993
+    }
+  },
+  {
+    "self_ref": "#/texts/106",
+    "type": "text",
+    "content": "To enable a meaningful benchmark, we composed a test set of 89 PDF files covering a large variety of styles, features, content, and length (see Figure 2). This dataset is based to a large extend on our DocLayNet (Pfitzmann et al. 2022) dataset and augmented with additional samples from CCpdf (Turski et al. 2023) to increase the variety. Overall, it includes 4008 pages, 56246 text items, 1842 tables and 4676 pictures. As such, it is large enough to provide variety without requiring excessively long benchmarking times.",
+    "page": 4,
+    "bbox": {
+      "left": 319.5,
+      "top": 354.675,
+      "right": 558.005,
+      "bottom": 258.452
+    }
+  },
+  {
+    "self_ref": "#/texts/107",
+    "type": "text",
+    "content": "5.2 System Configurations",
+    "page": 4,
+    "bbox": {
+      "left": 319.5,
+      "top": 245.89200000000005,
+      "right": 449.809,
+      "bottom": 236.08500000000004
+    }
+  },
+  {
+    "self_ref": "#/texts/108",
+    "type": "text",
+    "content": "We schedule our benchmark experiments each on two different systems to create reference numbers:",
+    "page": 4,
+    "bbox": {
+      "left": 319.5,
+      "top": 229.76700000000005,
+      "right": 558.005,
+      "bottom": 210.25700000000006
+    }
+  },
+  {
+    "self_ref": "#/texts/109",
+    "type": "text",
+    "content": "\u00b7 AWS EC2 VM (g6.xlarge), 8 virtual cores (AMD EPYC 7R13, x86), 32 GB RAM, Nvidia L4 GPU (24 GB VRAM), on Ubuntu 22.04 with Nvidia CUDA 12.4 drivers",
+    "page": 4,
+    "bbox": {
+      "left": 323.983,
+      "top": 203.10699999999997,
+      "right": 558.004,
+      "bottom": 161.678
+    }
+  },
+  {
+    "self_ref": "#/texts/110",
+    "type": "text",
+    "content": "\u00b7 MacBook Pro M3 Max (ARM), 64GB RAM, on macOS 14.7",
+    "page": 4,
+    "bbox": {
+      "left": 323.983,
+      "top": 156.02300000000002,
+      "right": 558.004,
+      "bottom": 136.51199999999994
+    }
+  },
+  {
+    "self_ref": "#/texts/111",
+    "type": "text",
+    "content": "All experiments on the AWS EC2 VM are carried out once with GPU acceleration enabled and once purely on the x86 CPU, resulting in three total system configurations which we refer to as M3 Max SoC, L4 GPU, and x86 CPU.",
+    "page": 4,
+    "bbox": {
+      "left": 319.5,
+      "top": 129.36300000000006,
+      "right": 558.005,
+      "bottom": 87.93399999999997
+    }
+  }
+]
