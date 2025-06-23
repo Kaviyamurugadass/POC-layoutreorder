@@ -21,3 +21,23 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+/output
+.json
+.cache-loader
+.cache-loader.json
+/.cache
+# next.js
+
+/pycache
+__pycache__
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info
+*.eggs
+*.whl
+*.dist-info
+*.egg
+*.manifest

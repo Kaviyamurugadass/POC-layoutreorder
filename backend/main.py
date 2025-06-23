@@ -1,5 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Body
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, PlainTextResponse
 from pathlib import Path
 import shutil
 import json
@@ -309,4 +309,16 @@ async def save_all_orders(order: dict = Body(...)):
     order_path = OUTPUT_DIR / "all_reading_orders.json"
     with open(order_path, "w", encoding="utf-8") as f:
         json.dump(order, f, indent=2)
-    return {"message": "All orders saved."} 
+    return {"message": "All orders saved."}
+
+@app.post("/export_markdown")
+def export_markdown(order: dict = Body(...)):
+    # Use Docling to convert the JSON order to markdown
+    try:
+        from docling.document import Document
+        # Convert the JSON order to a Docling Document
+        doc = Document.from_json(order)
+        markdown = doc.to_markdown()
+        return PlainTextResponse(markdown, media_type="text/markdown")
+    except Exception as e:
+        return PlainTextResponse(f"Error converting to markdown: {e}", status_code=500) 

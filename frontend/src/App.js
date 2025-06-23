@@ -130,32 +130,30 @@ function App() {
   };
 
   // Save/export all orders
-  const handleSaveAll = () => {
+  const getReorderedOutput = () => {
     const reorderedOutput = [];
-    
-    // Process all pages
     for (let pageNo = 0; pageNo < pagesCount; pageNo++) {
       const pageBoxes = editedBoxes[pageNo] || [];
       const correctedOrder = correctedPages[pageNo] || [];
-      
       if (correctedOrder.length > 0) {
-        // Use corrected order
         const boxesMap = {};
         pageBoxes.forEach(box => {
           boxesMap[box.self_ref] = box;
         });
-        
         correctedOrder.forEach(selfRef => {
           if (boxesMap[selfRef]) {
             reorderedOutput.push(boxesMap[selfRef]);
           }
         });
       } else {
-        // Use current order for pages that haven't been corrected
         reorderedOutput.push(...pageBoxes);
       }
     }
-    
+    return reorderedOutput;
+  };
+
+  const handleSaveAll = () => {
+    const reorderedOutput = getReorderedOutput();
     const blob = new Blob([JSON.stringify(reorderedOutput, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -163,6 +161,23 @@ function App() {
     a.download = 'reordered_bounding_boxes.json';
     a.click();
     setOrderSaved(true);
+  };
+
+  const handleExportMarkdown = async () => {
+    const reorderedOutput = getReorderedOutput();
+    try {
+      const res = await axios.post(`${API_BASE}/export_markdown`, reorderedOutput, {
+        headers: { 'Content-Type': 'application/json' },
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'exported.md';
+      a.click();
+    } catch (err) {
+      alert('Failed to export markdown.');
+    }
   };
 
   // Navigation
@@ -249,6 +264,17 @@ function App() {
             allPagesCorrected={allPagesCorrected}
             orderSaved={orderSaved}
           />
+          {/* Show Save All and Export to Markdown when all pages are corrected */}
+          {allPagesCorrected && (
+            <div className="flex gap-4 mt-6 justify-center">
+              <button className="save-btn action-btn" onClick={handleSaveAll}>
+                Save All (JSON)
+              </button>
+              <button className="action-btn" style={{background:'#6366f1', color:'white'}} onClick={handleExportMarkdown}>
+                Export to Markdown
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
