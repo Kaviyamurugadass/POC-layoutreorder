@@ -4,6 +4,7 @@ import BlockList from './BlockList';
 function Sidebar({ 
   boxes,
   onDragEnd,
+  handleBlockUpdate,
   isCurrentPageCorrected,
   isOpen,
   onToggle
@@ -34,7 +35,8 @@ function Sidebar({
           <h3>Content Elements ({boxes.length})</h3>
           <BlockList 
             boxes={boxes} 
-            onDragEnd={onDragEnd} 
+            onDragEnd={onDragEnd}
+            handleBlockUpdate={handleBlockUpdate}
             disabled={isCurrentPageCorrected}
             isCurrentPageCorrected={isCurrentPageCorrected}
           />

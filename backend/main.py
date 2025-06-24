@@ -68,7 +68,7 @@ def draw_page_boxes(pdf_path: Path, docling_doc, page_no: int, dpi: int = 150):
 
                 rect = patches.Rectangle((x, y), w, h, linewidth=2, edgecolor='red', facecolor='none')
                 ax.add_patch(rect)
-                ax.text(x, y - 5, str(idx + 1), fontsize=12, color='red', weight='bold')
+                # ax.text(x, y - 5, str(idx + 1), fontsize=12, color='red', weight='bold')
     for item in docling_doc.pictures:
         if item.prov and item.prov[0].page_no == page_no + 1:
             box = item.prov[0].bbox
@@ -84,7 +84,7 @@ def draw_page_boxes(pdf_path: Path, docling_doc, page_no: int, dpi: int = 150):
                 linewidth=2, edgecolor='red', facecolor='none'
             )
             ax.add_patch(rect)
-            ax.text(x, y - 5, item.self_ref.split("/")[-1], color='red', weight='bold')
+            # ax.text(x, y - 5, item.self_ref.split("/")[-1], color='red', weight='bold')
 
     ax.set_xlim(0, width)
     ax.set_ylim(height, 0)

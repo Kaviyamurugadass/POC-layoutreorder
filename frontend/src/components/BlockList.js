@@ -4,7 +4,8 @@ import BlockEditor from './BlockEditor';
 
 const BlockList = ({ 
   boxes, 
-  onDragEnd, 
+  onDragEnd,
+  handleBlockUpdate,
   disabled = false,
   isCurrentPageCorrected = false 
 }) => {
@@ -24,7 +25,7 @@ const BlockList = ({
     onDragEnd(result);
   };
 
-  const handleBlockUpdate = (blockId, updates) => {
+  const handleLocalBlockUpdate = (blockId, updates) => {
     // Find the corresponding box and update it
     const boxIndex = boxes.findIndex(box => box.self_ref === blockId);
     if (boxIndex !== -1) {
@@ -37,15 +38,14 @@ const BlockList = ({
         metadata: updates.metadata || currentBox.metadata
       };
       
-      // Since onDragEnd from App.js expects the full reordered array, 
-      // we pass the updated array here.
-      onDragEnd(updatedBoxes);
+      // Use the dedicated handleBlockUpdate function for content updates
+      handleBlockUpdate(updatedBoxes);
     }
   };
 
   const handleBlockDelete = (blockId) => {
     const updatedBoxes = boxes.filter(box => box.self_ref !== blockId);
-    onDragEnd(updatedBoxes);
+    handleBlockUpdate(updatedBoxes);
   };
 
   const handleBlockDuplicate = (blockId) => {
@@ -58,7 +58,7 @@ const BlockList = ({
       };
       const updatedBoxes = [...boxes];
       updatedBoxes.splice(boxIndex + 1, 0, newBox);
-      onDragEnd(updatedBoxes);
+      handleBlockUpdate(updatedBoxes);
     }
   };
 
@@ -94,7 +94,7 @@ const BlockList = ({
                     <BlockEditor
                       block={block}
                       isSelected={selectedBlock === block.id}
-                      onUpdate={(updates) => handleBlockUpdate(block.id, updates)}
+                      onUpdate={(updates) => handleLocalBlockUpdate(block.id, updates)}
                       onSelect={() => setSelectedBlock(block.id)}
                       onDelete={() => handleBlockDelete(block.id)}
                       onDuplicate={() => handleBlockDuplicate(block.id)}

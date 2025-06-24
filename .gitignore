@@ -41,3 +41,11 @@ __pycache__
 *.dist-info
 *.egg
 *.manifest
+
+/backend/backend/output
+/backend/backend/.cache
+backend/__pycache__
+backend/__pycache__/main.cpython-312.pyc
+backend/__pycache__/main.cpython-312.pyc
+backend/output/annotated_images
+backend/output

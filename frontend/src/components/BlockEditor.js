@@ -145,6 +145,12 @@ const BlockEditor = ({
     }
   }, [isEditing]);
 
+  // Update local state when block content changes from outside
+  useEffect(() => {
+    setEditContent(block.content);
+    setEditCaption(block.metadata?.caption || '');
+  }, [block.content, block.metadata?.caption]);
+
   const handleSave = () => {
     const updates = { content: editContent };
     if (block.type === 'picture' && editCaption !== block.metadata?.caption) {

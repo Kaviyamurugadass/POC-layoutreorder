@@ -103,6 +103,19 @@ function App() {
     setOrderSaved(false);
   };
 
+  // Handle block updates (content editing)
+  const handleBlockUpdate = (updatedBoxes) => {
+    setBoxes(updatedBoxes);
+    
+    // Update edited boxes state for the current page
+    setEditedBoxes(prev => ({
+      ...prev,
+      [currentPage]: updatedBoxes
+    }));
+
+    setOrderSaved(false);
+  };
+
   // Confirm/correct order for current page
   const handleCorrect = () => {
     setCorrectedPages(prev => ({
@@ -238,6 +251,7 @@ function App() {
         isCurrentPageCorrected={isCurrentPageCorrected}
         isOpen={sidebarOpen}
         onToggle={toggleSidebar}
+        handleBlockUpdate={handleBlockUpdate}
       />
       <div className="main-content">
         <div className="pdf-container">
