@@ -1,0 +1,170 @@
+[
+  {
+    "self_ref": "#/texts/0",
+    "type": "text",
+    "content": "arXiv:2408.09869v5  [cs.CL]  9 Dec 2024",
+    "page": 1,
+    "bbox": {
+      "left": 18.34,
+      "top": 627.0,
+      "right": 36.34,
+      "bottom": 237.0
+    },
+    "label": "page_header",
+    "content_layer": "furniture"
+  },
+  {
+    "self_ref": "#/texts/1",
+    "type": "text",
+    "content": "Docling Technical Report",
+    "page": 1,
+    "bbox": {
+      "left": 212.59,
+      "top": 566.64,
+      "right": 399.412,
+      "bottom": 551.163
+    },
+    "label": "section_header",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/2",
+    "type": "text",
+    "content": "Version 1.0",
+    "page": 1,
+    "bbox": {
+      "left": 283.31,
+      "top": 511.978,
+      "right": 328.69,
+      "bottom": 503.426
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/3",
+    "type": "text",
+    "content": "Christoph Auer Maksym Lysak Ahmed Nassar Michele Dolfi Nikolaos Livathinos Panos Vagenas Cesar Berrospi Ramis Matteo Omenetti Fabian Lindlbauer Kasper Dinkla Lokesh Mishra Yusik Kim Shubham Gupta Rafael Teixeira de Lima Valery Weber Lucas Morin Ingmar Meijer Viktor Kuropiatnyk Peter W. J. Staar",
+    "page": 1,
+    "bbox": {
+      "left": 113.643,
+      "top": 481.532,
+      "right": 498.359,
+      "bottom": 439.849
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/4",
+    "type": "text",
+    "content": "AI4K Group, IBM Research R¨ uschlikon, Switzerland",
+    "page": 1,
+    "bbox": {
+      "left": 249.283,
+      "top": 427.545,
+      "right": 362.717,
+      "bottom": 408.084
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/5",
+    "type": "text",
+    "content": "Abstract",
+    "page": 1,
+    "bbox": {
+      "left": 283.758,
+      "top": 393.159,
+      "right": 328.243,
+      "bottom": 382.411
+    },
+    "label": "section_header",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/6",
+    "type": "text",
+    "content": "This technical report introduces Docling , an easy to use, self-contained, MITlicensed open-source package for PDF document conversion. It is powered by state-of-the-art specialized AI models for layout analysis (DocLayNet) and table structure recognition (TableFormer), and runs efficiently on commodity hardware in a small resource budget. The code interface allows for easy extensibility and addition of new features and models.",
+    "page": 1,
+    "bbox": {
+      "left": 143.865,
+      "top": 364.013,
+      "right": 468.138,
+      "bottom": 300.737
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/7",
+    "type": "text",
+    "content": "1 Introduction",
+    "page": 1,
+    "bbox": {
+      "left": 108.0,
+      "top": 267.802,
+      "right": 190.814,
+      "bottom": 257.054
+    },
+    "label": "section_header",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/8",
+    "type": "text",
+    "content": "Converting PDF documents back into a machine-processable format has been a major challenge for decades due to their huge variability in formats, weak standardization and printing-optimized characteristic, which discards most structural features and metadata. With the advent of LLMs and popular application patterns such as retrieval-augmented generation (RAG), leveraging the rich content embedded in PDFs has become ever more relevant. In the past decade, several powerful document understanding solutions have emerged on the market, most of which are commercial software, cloud offerings [3] and most recently, multi-modal vision-language models. As of today, only a handful of open-source tools cover PDF conversion, leaving a significant feature and quality gap to proprietary solutions.",
+    "page": 1,
+    "bbox": {
+      "left": 108.0,
+      "top": 239.37,
+      "right": 504.003,
+      "bottom": 143.54600000000005
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/9",
+    "type": "text",
+    "content": "With Docling , we open-source a very capable and efficient document conversion tool which builds on the powerful, specialized AI models and datasets for layout analysis and table structure recognition we developed and presented in the recent past [12, 13, 9]. Docling is designed as a simple, self-contained python library with permissive license, running entirely locally on commodity hardware. Its code architecture allows for easy extensibility and addition of new features and models.",
+    "page": 1,
+    "bbox": {
+      "left": 108.0,
+      "top": 135.88800000000003,
+      "right": 504.003,
+      "bottom": 83.52099999999996
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/10",
+    "type": "text",
+    "content": "Docling Technical Report",
+    "page": 1,
+    "bbox": {
+      "left": 108.0,
+      "top": 57.960000000000036,
+      "right": 200.506,
+      "bottom": 50.263000000000034
+    },
+    "label": "page_footer",
+    "content_layer": "furniture"
+  },
+  {
+    "self_ref": "#/texts/11",
+    "type": "text",
+    "content": "1",
+    "page": 1,
+    "bbox": {
+      "left": 303.509,
+      "top": 48.597999999999956,
+      "right": 308.49,
+      "bottom": 40.04600000000005
+    },
+    "label": "page_footer",
+    "content_layer": "furniture"
+  }
+]

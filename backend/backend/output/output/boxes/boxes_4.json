@@ -1,0 +1,58 @@
+[
+  {
+    "self_ref": "#/texts/22",
+    "type": "text",
+    "content": "5) Some more Example:",
+    "page": 5,
+    "bbox": {
+      "left": 72.024,
+      "top": 744.9260439453126,
+      "right": 225.902,
+      "bottom": 725.4390439453125
+    },
+    "label": "section_header",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/23",
+    "type": "text",
+    "content": "Table to MARKDOWN",
+    "page": 5,
+    "bbox": {
+      "left": 113.017,
+      "top": 524.7400439453126,
+      "right": 121.515,
+      "bottom": 459.56004394531254
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/24",
+    "type": "text",
+    "content": "CONVERSION",
+    "page": 5,
+    "bbox": {
+      "left": 103.057,
+      "top": 514.3000439453125,
+      "right": 111.555,
+      "bottom": 471.48204394531257
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/25",
+    "type": "text",
+    "content": "--------------------------------------------------------------------------------------------------------------",
+    "page": 5,
+    "bbox": {
+      "left": 72.024,
+      "top": 142.68804394531253,
+      "right": 521.148,
+      "bottom": 128.03604394531249
+    },
+    "label": "text",
+    "content_layer": "body"
+  }
+]

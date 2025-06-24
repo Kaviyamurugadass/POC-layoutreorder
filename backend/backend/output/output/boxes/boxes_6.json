@@ -1,0 +1,30 @@
+[
+  {
+    "self_ref": "#/texts/30",
+    "type": "text",
+    "content": "Table_caption",
+    "page": 7,
+    "bbox": {
+      "left": 72.024,
+      "top": 769.9980439453126,
+      "right": 184.829,
+      "bottom": 745.5290439453125
+    },
+    "label": "section_header",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/31",
+    "type": "text",
+    "content": "We are able to extract the title of the table, but out of 6 tables, I could retrieve it for only 5. We can also extract the column names of the tables.",
+    "page": 7,
+    "bbox": {
+      "left": 72.024,
+      "top": 737.6080439453125,
+      "right": 518.568,
+      "bottom": 706.0360439453125
+    },
+    "label": "text",
+    "content_layer": "body"
+  }
+]

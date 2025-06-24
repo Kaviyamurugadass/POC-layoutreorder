@@ -1,0 +1,114 @@
+[
+  {
+    "self_ref": "#/texts/9",
+    "type": "text",
+    "content": "3) complex table:",
+    "page": 3,
+    "bbox": {
+      "left": 72.024,
+      "top": 719.9660439453125,
+      "right": 183.489,
+      "bottom": 700.4790439453126
+    },
+    "label": "section_header",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/10",
+    "type": "text",
+    "content": "CONVERSION",
+    "page": 3,
+    "bbox": {
+      "left": 65.405,
+      "top": 502.32004394531253,
+      "right": 73.903,
+      "bottom": 459.50204394531255
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/11",
+    "type": "text",
+    "content": "Inventories",
+    "page": 3,
+    "bbox": {
+      "left": 374.95,
+      "top": 479.40104394531255,
+      "right": 420.856,
+      "bottom": 468.4120439453125
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/12",
+    "type": "text",
+    "content": "Missing of values",
+    "page": 3,
+    "bbox": {
+      "left": 251.81,
+      "top": 359.62504394531254,
+      "right": 305.994,
+      "bottom": 351.12704394531255
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/13",
+    "type": "text",
+    "content": "Two rows has been",
+    "page": 3,
+    "bbox": {
+      "left": 256.61,
+      "top": 262.3050439453125,
+      "right": 317.537,
+      "bottom": 253.80704394531256
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/14",
+    "type": "text",
+    "content": "combined",
+    "page": 3,
+    "bbox": {
+      "left": 270.29,
+      "top": 252.34504394531257,
+      "right": 302.306,
+      "bottom": 243.84704394531252
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/15",
+    "type": "text",
+    "content": "Table to",
+    "page": 3,
+    "bbox": {
+      "left": 85.205,
+      "top": 492.60004394531256,
+      "right": 93.703,
+      "bottom": 467.81504394531254
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/16",
+    "type": "text",
+    "content": "MARKDOWN",
+    "page": 3,
+    "bbox": {
+      "left": 75.365,
+      "top": 500.2800439453125,
+      "right": 83.863,
+      "bottom": 460.01604394531256
+    },
+    "label": "text",
+    "content_layer": "body"
+  }
+]

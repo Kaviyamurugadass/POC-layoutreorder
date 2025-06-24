@@ -1,0 +1,58 @@
+[
+  {
+    "self_ref": "#/texts/26",
+    "type": "text",
+    "content": "Table to",
+    "page": 6,
+    "bbox": {
+      "left": 109.157,
+      "top": 386.57004394531253,
+      "right": 117.655,
+      "bottom": 361.78504394531257
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/27",
+    "type": "text",
+    "content": "MARKDOWN",
+    "page": 6,
+    "bbox": {
+      "left": 99.191,
+      "top": 394.25004394531254,
+      "right": 107.718,
+      "bottom": 353.95904394531254
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/28",
+    "type": "text",
+    "content": "CONVERSION",
+    "page": 6,
+    "bbox": {
+      "left": 89.333,
+      "top": 396.29004394531256,
+      "right": 97.831,
+      "bottom": 353.4720439453125
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/29",
+    "type": "text",
+    "content": "If columns share the same name, the content is duplicated across all columns with that name.",
+    "page": 6,
+    "bbox": {
+      "left": 158.78,
+      "top": 395.33804394531256,
+      "right": 515.48,
+      "bottom": 363.7460439453125
+    },
+    "label": "text",
+    "content_layer": "body"
+  }
+]

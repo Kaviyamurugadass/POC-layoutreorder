@@ -1,0 +1,72 @@
+[
+  {
+    "self_ref": "#/texts/17",
+    "type": "text",
+    "content": "4) split table",
+    "page": 4,
+    "bbox": {
+      "left": 72.024,
+      "top": 719.9660439453125,
+      "right": 151.632,
+      "bottom": 700.4790439453126
+    },
+    "label": "section_header",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/18",
+    "type": "text",
+    "content": "Table to",
+    "page": 4,
+    "bbox": {
+      "left": 110.407,
+      "top": 393.94004394531254,
+      "right": 118.905,
+      "bottom": 369.1550439453125
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/19",
+    "type": "text",
+    "content": "MARKDOWN",
+    "page": 4,
+    "bbox": {
+      "left": 100.447,
+      "top": 401.62004394531255,
+      "right": 108.945,
+      "bottom": 361.35604394531254
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/20",
+    "type": "text",
+    "content": "CONVERSION",
+    "page": 4,
+    "bbox": {
+      "left": 90.605,
+      "top": 403.66004394531257,
+      "right": 99.103,
+      "bottom": 360.8420439453125
+    },
+    "label": "text",
+    "content_layer": "body"
+  },
+  {
+    "self_ref": "#/texts/21",
+    "type": "text",
+    "content": "When a table is split across pages and the continuation is missing.",
+    "page": 4,
+    "bbox": {
+      "left": 150.62,
+      "top": 397.49804394531253,
+      "right": 436.676,
+      "bottom": 365.90604394531255
+    },
+    "label": "text",
+    "content_layer": "body"
+  }
+]
