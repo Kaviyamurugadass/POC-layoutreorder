@@ -99,18 +99,17 @@ def draw_page_boxes(pdf_path: Path, docling_doc, page_no: int, dpi: int = 150):
 # Helper to extract and save per-page images and bounding boxes
 def process_pdf(pdf_path: Path):
     # Docling extraction
-    pipeline_options = PdfPipelineOptions(
-        layout_analysis=True,
-        images_scale=2.0,
-        generate_page_images=False,
-        generate_picture_images=True,
-        do_ocr=False,
-        layout_analysis_params={
-            "reading_order_strategy": "column",
-            "whitespace_threshold": 20,
-        }
-    )
-    converter = DocumentConverter(format_options={InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)})
+    # pipeline_options = PdfPipelineOptions(
+    #     layout_analysis=True,
+    #     images_scale=2.0,
+    #     generate_picture_images=True,
+    #     layout_analysis_params={
+    #         "reading_order_strategy": "column",
+    #         "whitespace_threshold": 20,
+    #     }
+    # )
+    # converter = DocumentConverter(format_options={InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)})
+    converter = DocumentConverter()
     result = converter.convert(pdf_path)
     doc = result.document
 

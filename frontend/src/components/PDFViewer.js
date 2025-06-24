@@ -13,11 +13,9 @@ const ReadingOrderOverlay = ({ boxes, imageWidth, imageHeight, displayedWidth, d
 
   // Calculate dynamic size for numbers based on image dimensions
   const baseSize = Math.min(displayedWidth, displayedHeight);
-  const dynamicFontSize = Math.max(12, Math.min(16, baseSize * 0.015));
+  const dynamicFontSize = Math.max(10, Math.min(14, baseSize * 0.015));
   const dynamicSize = Math.max(20, Math.min(30, baseSize * 0.03));
   const dynamicPadding = Math.max(2, Math.min(6, baseSize * 0.005));
-
-  const reversedBoxes = [...boxes].reverse();
 
   return (
     <div 
@@ -31,7 +29,7 @@ const ReadingOrderOverlay = ({ boxes, imageWidth, imageHeight, displayedWidth, d
         pointerEvents: 'none'
       }}
     >
-      {reversedBoxes.map((box, index) => {
+      {boxes.map((box, index) => {
         if (!box.bbox) return null;
         
         // The core issue is often a mismatch between the assumed DPI and the actual
@@ -48,7 +46,7 @@ const ReadingOrderOverlay = ({ boxes, imageWidth, imageHeight, displayedWidth, d
         const displayX = imagePixelX * scaleX;
         const displayY = imagePixelY * scaleY;
         
-        const readingOrderNumber = boxes.length - index;
+        const readingOrderNumber = index + 1;
         
         return (
           <div
@@ -256,10 +254,10 @@ const PDFViewer = ({
                 maxHeight: 'none'
               }}
             />
-            {imageLoaded && originalBoxes.length > 0 && displayedDimensions.width > 0 && displayedDimensions.height > 0 && (
+            {imageLoaded && boxes.length > 0 && displayedDimensions.width > 0 && displayedDimensions.height > 0 && (
               <ReadingOrderOverlay
                 key={overlayKey} // Force re-render when dimensions change
-                boxes={originalBoxes}
+                boxes={boxes}
                 imageWidth={imageDimensions.width}
                 imageHeight={imageDimensions.height}
                 displayedWidth={displayedDimensions.width}
