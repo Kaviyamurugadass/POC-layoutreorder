@@ -38,7 +38,7 @@ const ReadingOrderOverlay = ({ boxes, imageWidth, imageHeight, displayedWidth, d
         // DPI used to render the PDF image. We'll use a more standard DPI of 144 (2x 72)
         // and a more robust formula to correct the positioning.
         const dpi = 130;
-        const pdfToImageScale = dpi / 72; // This will be exactly 2.0
+        const pdfToImageScale = dpi / 72;
 
         // Convert PDF's bottom-left coordinates to the image's top-left pixel coordinates.
         const imagePixelX = box.bbox.left * pdfToImageScale;
@@ -47,19 +47,6 @@ const ReadingOrderOverlay = ({ boxes, imageWidth, imageHeight, displayedWidth, d
         // Finally, scale the image-pixel coordinates to the final displayed size.
         const displayX = imagePixelX * scaleX;
         const displayY = imagePixelY * scaleY;
-
-        // Debug logging
-        console.log(`Box ${index + 1}:`, {
-          bbox: box.bbox,
-          usedDpi: dpi,
-          imagePixels: { x: imagePixelX, y: imagePixelY },
-          display: { x: displayX, y: displayY },
-          scales: { scaleX, scaleY },
-          dimensions: { 
-            image: { width: imageWidth, height: imageHeight },
-            display: { width: displayedWidth, height: displayedHeight }
-          }
-        });
         
         const readingOrderNumber = boxes.length - index;
         
