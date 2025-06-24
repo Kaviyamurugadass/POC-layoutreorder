@@ -13,6 +13,7 @@ from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import PdfPipelineOptions
 from docling.document_converter import DocumentConverter, PdfFormatOption
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
@@ -320,4 +321,18 @@ def export_markdown(order: dict = Body(...)):
         markdown = doc.to_markdown()
         return PlainTextResponse(markdown, media_type="text/markdown")
     except Exception as e:
-        return PlainTextResponse(f"Error converting to markdown: {e}", status_code=500) 
+        return PlainTextResponse(f"Error converting to markdown: {e}", status_code=500)
+
+# Path to built React app
+frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "build")
+
+# Serve static files from the React build directory
+app.mount("/static", StaticFiles(directory=os.path.join(frontend_path, "static")), name="static")
+
+# Serve the main index.html for any other route
+@app.get("/{full_path:path}")
+async def serve_react_app(full_path: str):
+    index_path = os.path.join(frontend_path, "index.html")
+    if not os.path.exists(index_path):
+        raise HTTPException(status_code=404, detail="index.html not found")
+    return FileResponse(index_path) 
