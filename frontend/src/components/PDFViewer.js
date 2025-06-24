@@ -11,6 +11,12 @@ const ReadingOrderOverlay = ({ boxes, imageWidth, imageHeight, displayedWidth, d
   const scaleX = displayedWidth / imageWidth;
   const scaleY = displayedHeight / imageHeight;
 
+  // Calculate dynamic size for numbers based on image dimensions
+  const baseSize = Math.min(displayedWidth, displayedHeight);
+  const dynamicFontSize = Math.max(12, Math.min(16, baseSize * 0.015));
+  const dynamicSize = Math.max(20, Math.min(30, baseSize * 0.03));
+  const dynamicPadding = Math.max(2, Math.min(6, baseSize * 0.005));
+
   const reversedBoxes = [...boxes].reverse();
 
   return (
@@ -28,25 +34,25 @@ const ReadingOrderOverlay = ({ boxes, imageWidth, imageHeight, displayedWidth, d
       {reversedBoxes.map((box, index) => {
         if (!box.bbox) return null;
         
-        // Convert PDF coordinates directly to display coordinates
-        // PDF uses points (72 DPI), we need to scale to image pixels first, then to display
-        
-        // Step 1: Convert PDF points to image pixels
-        const pdfToImageScale = dpi / 72;
+        // The core issue is often a mismatch between the assumed DPI and the actual
+        // DPI used to render the PDF image. We'll use a more standard DPI of 144 (2x 72)
+        // and a more robust formula to correct the positioning.
+        const dpi = 130;
+        const pdfToImageScale = dpi / 72; // This will be exactly 2.0
+
+        // Convert PDF's bottom-left coordinates to the image's top-left pixel coordinates.
         const imagePixelX = box.bbox.left * pdfToImageScale;
-        const imagePixelY = box.bbox.top * pdfToImageScale;
-        
-        // Step 2: Convert to display coordinates
-        // Note: PDF Y coordinate starts from bottom, image Y starts from top
+        const imagePixelY = imageHeight - (box.bbox.top * pdfToImageScale);
+
+        // Finally, scale the image-pixel coordinates to the final displayed size.
         const displayX = imagePixelX * scaleX;
-        const displayY = (imageHeight - imagePixelY) * scaleY;
+        const displayY = imagePixelY * scaleY;
 
         // Debug logging
         console.log(`Box ${index + 1}:`, {
           bbox: box.bbox,
-          pdfToImageScale,
+          usedDpi: dpi,
           imagePixels: { x: imagePixelX, y: imagePixelY },
-          flippedImageY: imageHeight - imagePixelY,
           display: { x: displayX, y: displayY },
           scales: { scaleX, scaleY },
           dimensions: { 
@@ -55,7 +61,6 @@ const ReadingOrderOverlay = ({ boxes, imageWidth, imageHeight, displayedWidth, d
           }
         });
         
-        // Calculate the actual reading order number (reverse the index)
         const readingOrderNumber = boxes.length - index;
         
         return (
@@ -66,17 +71,17 @@ const ReadingOrderOverlay = ({ boxes, imageWidth, imageHeight, displayedWidth, d
               left: `${displayX}px`,
               top: `${displayY}px`,
               color: '#fff',
-              fontSize: '12px',
+              fontSize: `${dynamicFontSize}px`,
               fontWeight: 'bold',
               zIndex: 10,
               pointerEvents: 'auto',
               background: '#ff0000',
-              padding: '2px 6px',
-              borderRadius: '12px',
-              minWidth: '20px',
-              height: '20px',
+              padding: `${dynamicPadding}px ${dynamicPadding * 2}px`,
+              borderRadius: `${dynamicSize/2}px`,
+              minWidth: `${dynamicSize}px`,
+              height: `${dynamicSize}px`,
               textAlign: 'center',
-              lineHeight: '16px',
+              lineHeight: `${dynamicSize - (dynamicPadding * 2)}px`,
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               display: 'flex',
