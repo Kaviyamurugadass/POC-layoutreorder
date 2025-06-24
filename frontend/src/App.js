@@ -13,6 +13,7 @@ function App() {
   const [pagesCount, setPagesCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const [boxes, setBoxes] = useState([]);
+  const [originalBoxes, setOriginalBoxes] = useState([]); // Store original boxes for numbering
   const [imageUrl, setImageUrl] = useState('');
   const [loadingPage, setLoadingPage] = useState(false);
   const [orderSaved, setOrderSaved] = useState(false);
@@ -61,6 +62,7 @@ function App() {
         const fetchedBoxes = res.data;
         console.log("Bounding Boxes", res.data)
         setBoxes(fetchedBoxes);
+        setOriginalBoxes(fetchedBoxes);
         // Store original boxes for this page if not already stored
         setEditedBoxes(prev => ({
           ...prev,
@@ -277,6 +279,8 @@ function App() {
             isCurrentPageCorrected={isCurrentPageCorrected}
             allPagesCorrected={allPagesCorrected}
             orderSaved={orderSaved}
+            boxes={boxes}
+            originalBoxes={originalBoxes}
           />
           {/* Show Save All and Export to Markdown when all pages are corrected */}
           {allPagesCorrected && (
@@ -294,5 +298,44 @@ function App() {
     </div>
   );
 }
+
+const ReadingOrderOverlay = ({ boxes, imageWidth, imageHeight, dpi = 150 }) => {
+  const zoom = dpi / 72; // Default PDF resolution is 72 dpi
+
+  return (
+    <div className="reading-order-overlay" style={{ width: imageWidth, height: imageHeight, position: 'absolute', top: 0, left: 0 }}>
+      {boxes.map((box, index) => {
+        if (!box.bbox) return null;
+
+        // Calculate top-left corner in image pixels
+        const x = box.bbox.left * zoom;
+        const y = (imageHeight - box.bbox.top * zoom);
+
+        return (
+          <div
+            key={box.self_ref}
+            style={{
+              position: 'absolute',
+              left: `${x}px`,
+              top: `${y}px`,
+              color: 'red',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              zIndex: 10,
+              pointerEvents: 'none',
+              background: 'none',
+              padding: 0,
+              margin: 0,
+              lineHeight: 1,
+              userSelect: 'none'
+            }}
+          >
+            {index + 1}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 export default App;

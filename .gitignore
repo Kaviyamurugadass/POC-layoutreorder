@@ -50,3 +50,5 @@ backend/__pycache__/main.cpython-312.pyc
 backend/output/annotated_images
 backend/output
 backend/uploads
+backend/debug_picture_items.json
+backend/debug_picture_items.json
