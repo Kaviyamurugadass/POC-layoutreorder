@@ -32,3 +32,6 @@ tifffile
 click
 dill
 hf-xet
+PyMuPDF
+matplotlib
+Pillow
