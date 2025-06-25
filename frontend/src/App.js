@@ -299,43 +299,4 @@ function App() {
   );
 }
 
-const ReadingOrderOverlay = ({ boxes, imageWidth, imageHeight, dpi = 150 }) => {
-  const zoom = dpi / 72; // Default PDF resolution is 72 dpi
-
-  return (
-    <div className="reading-order-overlay" style={{ width: imageWidth, height: imageHeight, position: 'absolute', top: 0, left: 0 }}>
-      {boxes.map((box, index) => {
-        if (!box.bbox) return null;
-
-        // Calculate top-left corner in image pixels
-        const x = box.bbox.left * zoom;
-        const y = (imageHeight - box.bbox.top * zoom);
-
-        return (
-          <div
-            key={box.self_ref}
-            style={{
-              position: 'absolute',
-              left: `${x}px`,
-              top: `${y}px`,
-              color: 'red',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              zIndex: 10,
-              pointerEvents: 'none',
-              background: 'none',
-              padding: 0,
-              margin: 0,
-              lineHeight: 1,
-              userSelect: 'none'
-            }}
-          >
-            {index + 1}
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
 export default App;
