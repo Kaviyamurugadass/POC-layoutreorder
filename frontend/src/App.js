@@ -5,7 +5,8 @@ import Sidebar from './components/Sidebar';
 import PDFViewer from './components/PDFViewer';
 import './App.css';
 
-const API_BASE = 'https://poc-layoutreorder.onrender.com';
+const API_BASE = 'http://localhost:8000';
+// const API_BASE = 'https://poc-layoutreorder.onrender.com';
 
 function App() {
   const [pdfFile, setPdfFile] = useState(null);

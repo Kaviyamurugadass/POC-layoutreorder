@@ -95,7 +95,8 @@ def draw_page_boxes(pdf_path: Path, docling_doc, page_no: int, dpi: int = 150):
     # Save the annotated image
     annotated_path = ANNOTATED_IMAGES_DIR / f"annotated_page_{page_no}.png"
     plt.savefig(annotated_path, dpi=dpi, bbox_inches='tight', pad_inches=0)
-    plt.close()
+    plt.clf()
+    plt.close('all')
 
 # Helper to extract and save per-page images and bounding boxes
 def process_pdf(pdf_path: Path):
@@ -251,10 +252,9 @@ def process_pdf(pdf_path: Path):
 
 @app.post("/upload_pdf")
 async def upload_pdf(file: UploadFile = File(...)):
-    if not file.filename.endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF files are supported.")
     with open(PDF_PATH, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        while chunk := await file.read(1024 * 1024):  # 1MB chunks
+            buffer.write(chunk)
     try:
         process_pdf(PDF_PATH)
     except Exception as e:
