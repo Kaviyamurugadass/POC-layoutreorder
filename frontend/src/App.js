@@ -168,30 +168,84 @@ function App() {
     return reorderedOutput;
   };
 
-  const handleSaveAll = () => {
-    const reorderedOutput = getReorderedOutput();
-    const blob = new Blob([JSON.stringify(reorderedOutput, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'reordered_bounding_boxes.json';
-    a.click();
-    setOrderSaved(true);
+  const handleSaveAll = async () => {
+    console.log("Handle Save All")
+    try {
+      // First save all orders and text changes
+      const reorderedOutput = getReorderedOutput();
+      const orderData = {
+        order: reorderedOutput.map(box => box.self_ref),
+        texts: {}
+      };
+      
+      // Extract text content from reordered output
+      reorderedOutput.forEach(box => {
+        if (box.type === 'text' && box.content) {
+          orderData.texts[box.self_ref] = box.content;
+        }
+      });
+      
+      console.log("Order Data", orderData)
+      // Save orders and texts
+      await axios.post(`${API_BASE}/save_all_orders`, orderData);
+      
+      // Now save complete edited JSON and generate markdown
+      const result = await axios.post(`${API_BASE}/save_complete_json_and_markdown`);
+      console.log("Result save all", result)
+      // Download the complete edited JSON
+      const jsonResponse = await axios.get(`${API_BASE}/download_complete_edited_json`, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([jsonResponse.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'complete_edited_document.json';
+      a.click();
+      
+      setOrderSaved(true);
+      alert('Complete edited JSON saved successfully!');
+    } catch (err) {
+      console.error('Error saving complete JSON:', err);
+      alert('Failed to save complete edited JSON.');
+    }
   };
 
   const handleExportMarkdown = async () => {
-    const reorderedOutput = getReorderedOutput();
+    console.log("Handle Export Markdown")
     try {
-      const res = await axios.post(`${API_BASE}/export_markdown`, reorderedOutput, {
-        headers: { 'Content-Type': 'application/json' },
-        responseType: 'blob',
+      // First save all orders and text changes
+      const reorderedOutput = getReorderedOutput();
+      const orderData = {
+        order: reorderedOutput.map(box => box.self_ref),
+        texts: {}
+      };
+      
+      // Extract text content from reordered output
+      reorderedOutput.forEach(box => {
+        if (box.type === 'text' && box.content) {
+          orderData.texts[box.self_ref] = box.content;
+        }
       });
+      
+      // Save orders and texts
+      await axios.post(`${API_BASE}/save_all_orders`, orderData);
+      
+      // Now save complete edited JSON and generate markdown
+      await axios.post(`${API_BASE}/save_complete_json_and_markdown`);
+      
+      // Download the complete edited markdown
+      const res = await axios.get(`${API_BASE}/download_complete_edited_markdown`, {
+        responseType: 'blob'
+      });
+      
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'exported.md';
+      a.download = 'complete_edited_document.md';
       a.click();
     } catch (err) {
+      console.error('Error exporting markdown:', err);
       alert('Failed to export markdown.');
     }
   };

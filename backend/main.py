@@ -342,6 +342,87 @@ def process_pdf(pdf_path: Path):
     with open(OUTPUT_DIR / "pages_count.txt", "w") as f:
         f.write(str(len(pdf)))
 
+def save_complete_edited_json_and_markdown():
+    """Save complete edited JSON including all groups, text, tables and generate markdown"""
+    global document, refs, text_dic, group_dic, pic_tex, table_tex
+    
+    if not document:
+        raise HTTPException(status_code=400, detail="No document processed. Please upload a PDF first.")
+    
+    try:
+        # Step 1: Generate initial JSON from document
+        output_path_json = pdf_to_json(PDF_PATH, document)
+        
+        # Step 2: Load the JSON
+        with open(output_path_json, "r", encoding="utf-8") as f:
+            x = json.load(f)
+        
+        # Step 3: Process reading order (same logic as Streamlit)
+        final_refs = refs.copy()
+        
+        # Remove group children, picture captions, and table captions
+        group_lis = []
+        for i in group_dic.values():
+            for j in i:
+                group_lis.append(j)
+        
+        for i in group_lis:
+            if i in final_refs:
+                final_refs.remove(i)
+        
+        pic_text_lis = []
+        for i in pic_tex.values():
+            for j in i:
+                pic_text_lis.append(j)
+        
+        for i in pic_text_lis:
+            if i in final_refs:
+                final_refs.remove(i)
+        
+        table_text_lis = []
+        for i in table_tex.values():
+            for j in i:
+                table_text_lis.append(j)
+        
+        for i in table_text_lis:
+            if i in final_refs:
+                final_refs.remove(i)
+        
+        # Step 4: Create children array with cleaned refs
+        children = [{"$ref": r} for r in final_refs]
+        
+        # Step 5: Update body children with new order
+        x["body"]["children"] = children
+        
+        # Step 6: Update text content with edited texts
+        for i in x.get("texts", []):
+            if i.get("self_ref") in text_dic:
+                i["text"] = text_dic[i["self_ref"]]
+        
+        # Step 7: Save the complete modified JSON
+        complete_json_path = OUTPUT_DIR / f"{PDF_PATH.stem}_complete_edited.json"
+        with open(complete_json_path, "w", encoding="utf-8") as f:
+            json.dump(x, f, indent=4)
+        
+        # Step 8: Generate markdown from the complete edited JSON
+        markdown_path = json_loader(complete_json_path)
+        markdown_content = read_markdown_file(markdown_path)
+        
+        # Step 9: Save markdown to file
+        markdown_file_path = OUTPUT_DIR / f"{PDF_PATH.stem}_complete_edited.md"
+        with open(markdown_file_path, "w", encoding="utf-8") as f:
+            f.write(markdown_content)
+        
+        return {
+            "json_path": str(complete_json_path),
+            "markdown_path": str(markdown_file_path),
+            "message": "Complete edited JSON and markdown saved successfully"
+        }
+        
+    except Exception as e:
+        _log.exception("Error saving complete edited JSON and markdown")
+        raise HTTPException(status_code=500, detail=f"Error saving complete edited JSON and markdown: {e}")
+
 @app.post("/upload_pdf")
 async def upload_pdf(file: UploadFile = File(...)):
     with open(PDF_PATH, "wb") as buffer:
@@ -384,12 +465,6 @@ def get_bounding_boxes(page_no: int):
     with open(box_path, "r", encoding="utf-8") as f:
         data = json.load(f)
     return JSONResponse(content=data)
-
-@app.get("/get_reading_order")
-def get_reading_order():
-    """Get current reading order and text content"""
-    global refs, text_dic
-    return {"refs": refs, "texts": text_dic}
 
 @app.post("/save_all_orders")
 async def save_all_orders(order_data: dict = Body(...)):
@@ -445,6 +520,59 @@ def export_json():
         _log.exception("Error exporting json")
         raise HTTPException(status_code=500, detail=f"Error exporting to JSON: {e}")
 
+@app.post("/save_complete_json_and_markdown")
+async def save_complete_json_and_markdown_endpoint():
+    """Save complete edited JSON including all groups, text, tables and generate markdown"""
+    return save_complete_edited_json_and_markdown()
+
+@app.get("/download_complete_edited_json")
+def download_complete_edited_json():
+    """Download the complete edited JSON file"""
+    global document
+    if not document:
+        raise HTTPException(status_code=400, detail="No document processed. Please upload a PDF first.")
+    
+    try:
+        # Check if the complete edited JSON already exists
+        complete_json_path = OUTPUT_DIR / f"{PDF_PATH.stem}_complete_edited.json"
+        
+        if not complete_json_path.exists():
+            # Generate the complete edited JSON if it doesn't exist
+            result = save_complete_edited_json_and_markdown()
+            json_path = Path(result["json_path"])
+        else:
+            json_path = complete_json_path
+        
+        return FileResponse(
+            json_path,
+            media_type="application/json",
+            filename=f"{PDF_PATH.stem}_complete_edited.json"
+        )
+    except Exception as e:
+        _log.exception("Error downloading complete edited JSON")
+        raise HTTPException(status_code=500, detail=f"Error downloading complete edited JSON: {e}")
+
+@app.get("/download_complete_edited_markdown")
+def download_complete_edited_markdown():
+    """Download the complete edited markdown file"""
+    global document
+    if not document:
+        raise HTTPException(status_code=400, detail="No document processed. Please upload a PDF first.")
+    
+    try:
+        # Generate the complete edited JSON and markdown
+        result = save_complete_edited_json_and_markdown()
+        markdown_path = Path(result["markdown_path"])
+        
+        return FileResponse(
+            markdown_path,
+            media_type="text/markdown",
+            filename=f"{PDF_PATH.stem}_complete_edited.md"
+        )
+    except Exception as e:
+        _log.exception("Error downloading complete edited markdown")
+        raise HTTPException(status_code=500, detail=f"Error downloading complete edited markdown: {e}")
+
 # Serve React App
 frontend_path = Path(__file__).parent.parent / "frontend" / "build"
 app.mount("/static", StaticFiles(directory=frontend_path / "static"), name="static")
@@ -455,3 +583,28 @@ async def serve_react_app(full_path: str):
     if not index_path.exists():
         raise HTTPException(status_code=404, detail="index.html not found")
     return FileResponse(index_path)
+
+def process_local_pdf(pdf_path: str):
+    """Process a local PDF file (similar to Streamlit approach)"""
+    global document
+    
+    pdf_path_obj = Path(pdf_path)
+    if not pdf_path_obj.exists():
+        raise HTTPException(status_code=404, detail=f"PDF file not found: {pdf_path}")
+    
+    try:
+        # Process the PDF
+        process_pdf(pdf_path_obj)
+        return {"message": f"Local PDF processed successfully: {pdf_path}"}
+    except Exception as e:
+        _log.exception("Local PDF processing failed")
+        raise HTTPException(status_code=500, detail=f"Local PDF processing failed: {e}")
+
+@app.post("/process_local_pdf")
+async def process_local_pdf_endpoint(pdf_data: dict = Body(...)):
+    """Process a local PDF file"""
+    if "pdf_path" not in pdf_data:
+        raise HTTPException(status_code=400, detail="pdf_path is required")
+    
+    pdf_path = pdf_data["pdf_path"]
+    return process_local_pdf(pdf_path)
