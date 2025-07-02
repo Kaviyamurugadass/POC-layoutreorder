@@ -18,6 +18,7 @@ from docling.backend.json.docling_json_backend import DoclingJSONBackend
 from docling.pipeline.simple_pipeline import SimplePipeline
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from wiki_upload import upload_markdown_to_wikijs
 
 app = FastAPI()
 
@@ -608,3 +609,24 @@ async def process_local_pdf_endpoint(pdf_data: dict = Body(...)):
     
     pdf_path = pdf_data["pdf_path"]
     return process_local_pdf(pdf_path)
+
+@app.post("/upload_to_wiki")
+def upload_to_wiki():
+    """
+    Upload the latest generated markdown to Wiki.js and return the page URL.
+    """
+    # Assume the markdown is saved as 'output/complete_edited_document.md'
+    markdown_path = OUTPUT_DIR / "uploaded_complete_edited.md"
+    if not markdown_path.exists():
+        return JSONResponse({"error": "Markdown file not found. Please export markdown first."}, status_code=404)
+    # Call the upload function and capture the URL
+    try:
+        # Patch: capture the URL from the upload function
+        # We'll modify upload_markdown_to_wikijs to return the URL
+        wiki_url = upload_markdown_to_wikijs(str(markdown_path))
+        if wiki_url:
+            return {"wiki_url": wiki_url}
+        else:
+            return JSONResponse({"error": "Wiki.js upload failed."}, status_code=500)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)

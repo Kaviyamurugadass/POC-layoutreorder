@@ -250,6 +250,24 @@ function App() {
     }
   };
 
+  const handleOpenInWiki = async () => {
+    try {
+      // Ensure backend has the latest markdown
+      await axios.post(`${API_BASE}/save_complete_json_and_markdown`);
+      // Trigger Wiki.js upload
+      const res = await axios.post(`${API_BASE}/upload_to_wiki`);
+      const { wiki_url } = res.data;
+      if (wiki_url) {
+        window.open(wiki_url, '_blank');
+      } else {
+        alert('Wiki.js page created, but no URL returned.');
+      }
+    } catch (err) {
+      console.error('Error uploading to Wiki.js:', err);
+      alert('Failed to upload to Wiki.js.');
+    }
+  };
+
   // Navigation
   const goPrev = () => setCurrentPage((p) => Math.max(0, p - 1));
   const goNext = () => setCurrentPage((p) => Math.min(pagesCount - 1, p + 1));
@@ -340,11 +358,14 @@ function App() {
           {/* Show Save All and Export to Markdown when all pages are corrected */}
           {allPagesCorrected && (
             <div className="flex gap-4 mt-6 justify-center">
-              <button className="save-btn action-btn" onClick={handleSaveAll}>
+              {/* <button className="save-btn action-btn" onClick={handleSaveAll}>
                 Save All (JSON)
-              </button>
+              </button> */}
               <button className="action-btn" style={{background:'#6366f1', color:'white'}} onClick={handleExportMarkdown}>
                 Export to Markdown
+              </button>
+              <button className="action-btn" style={{background:'#22c55e', color:'white'}} onClick={handleOpenInWiki}>
+                Open in Wiki
               </button>
             </div>
           )}
