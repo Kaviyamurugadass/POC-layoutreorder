@@ -574,16 +574,6 @@ def download_complete_edited_markdown():
         _log.exception("Error downloading complete edited markdown")
         raise HTTPException(status_code=500, detail=f"Error downloading complete edited markdown: {e}")
 
-# Serve React App
-frontend_path = Path(__file__).parent.parent / "frontend" / "build"
-app.mount("/static", StaticFiles(directory=frontend_path / "static"), name="static")
-
-@app.get("/{full_path:path}")
-async def serve_react_app(full_path: str):
-    index_path = frontend_path / "index.html"
-    if not index_path.exists():
-        raise HTTPException(status_code=404, detail="index.html not found")
-    return FileResponse(index_path)
 
 def process_local_pdf(pdf_path: str):
     """Process a local PDF file (similar to Streamlit approach)"""

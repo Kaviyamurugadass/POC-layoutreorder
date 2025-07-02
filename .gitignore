@@ -53,3 +53,5 @@ backend/uploads
 backend/debug_picture_items.json
 backend/debug_picture_items.json
 backend/config.py
+
+wikijs-data

@@ -24,9 +24,11 @@ services:
   wikijs:
     image: requarks/wiki:2
     ports:
-      - "3001:3000"  # Changed to avoid port conflict with frontend
+      - "3001:3000"  # Avoid conflict with frontend on port 3000
     environment:
       - DB_TYPE=sqlite
       - DB_FILEPATH=/wiki/data/wiki.db
     volumes:
       - ./wikijs-data:/wiki/data
+
+# docker-compose up --build
