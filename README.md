@@ -81,3 +81,12 @@ if no code changes:
    Backend - http://localhost:8000/docs
    wiki js - http://localhost:3001/a/dashboard
 
+### Install Docker & Docker compose
+
+https://docs.docker.com/get-started/get-docker/
+https://docs.docker.com/compose/install/
+
+Summary Table
+What to Install on Other System	Why?
+Docker ---->	To run containers
+Docker Compose ---->	To orchestrate containers
