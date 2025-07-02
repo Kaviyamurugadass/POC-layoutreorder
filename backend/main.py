@@ -9,9 +9,13 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from PIL import Image
 import io
+import logging
 from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import PdfPipelineOptions
-from docling.document_converter import DocumentConverter, PdfFormatOption
+from docling.document_converter import DocumentConverter, PdfFormatOption, FormatOption
+from docling_core.types.doc import ImageRefMode
+from docling.backend.json.docling_json_backend import DoclingJSONBackend
+from docling.pipeline.simple_pipeline import SimplePipeline
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -25,9 +29,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-UPLOAD_DIR = Path("uploads")
 OUTPUT_DIR = Path("output")
-UPLOAD_DIR.mkdir(exist_ok=True)
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 PDF_PATH = OUTPUT_DIR / "uploaded.pdf"
@@ -38,228 +40,318 @@ PAGE_IMAGES_DIR.mkdir(exist_ok=True)
 ANNOTATED_IMAGES_DIR.mkdir(exist_ok=True)
 BOXES_DIR.mkdir(exist_ok=True)
 
-IMAGE_DPI = 150
+_log = logging.getLogger(__name__)
+IMAGE_RESOLUTION_SCALE = 2.0
 
-# Helper to draw bounding boxes on PDF page image
-def draw_page_boxes(pdf_path: Path, docling_doc, page_no: int, dpi: int = 150):
-    doc = fitz.open(str(pdf_path))
+# Global variables to store document processing results
+document = None
+group_dic = {}
+pic_tex = {}
+table_tex = {}
+diction = {}
+state = []
+refs = []
+positions = []
+height_dic = {}
+processed_refs = set()
+text_state = {}
+text_dic = {}
+
+def load_docling_output(pdf_path: Path): #ok
+    pipeline_options = PdfPipelineOptions(
+        layout_analysis=True,
+        images_scale=IMAGE_RESOLUTION_SCALE,
+        generate_page_images=True,
+        generate_picture_images=True,
+        do_ocr=False,
+        #ocr_options=RapidOcrOptions()
+    )
+
+    converter = DocumentConverter(
+        format_options={
+            InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
+        }
+    )
+    
+    result = converter.convert(pdf_path)
+    return result.document
+
+def process_document_structure(doc):
+    global group_dic, pic_tex, table_tex, diction, state, refs, positions, height_dic, processed_refs, text_state, text_dic
+    
+    # Build group, picture, and table dictionaries
+    for i in doc.groups:
+        group_dic[i.self_ref] = [j.cref for j in i.children]
+    for i in doc.pictures:
+        pic_tex[i.self_ref] = [j.cref for j in i.captions]
+    for i in doc.tables:
+        table_tex[i.self_ref] = [j.cref for j in i.captions]
+
+    # Build the main dictionary following the same logic as the working sample
+    diction = {}
+    i = 0
+    body_children = doc.body.children
+    
+    for j in body_children:
+        refss = j.cref
+        
+        if "groups" in refss and refss in group_dic:
+            gl = group_dic[refss]
+            for l in gl:
+                if l not in diction:
+                    diction[l] = i
+                    i += 1
+        elif "pictures" in refss and refss in pic_tex:
+            if refss not in diction:
+                diction[refss] = i
+                i += 1
+            pl = pic_tex[refss]
+            for l in pl:
+                if l not in diction:
+                    diction[l] = i
+                    i += 1
+        elif "tables" in refss and refss in table_tex:
+            if refss not in diction:
+                diction[refss] = i
+                i += 1
+            tl = table_tex[refss]
+            for l in tl:
+                if l not in diction:
+                    diction[l] = i
+                    i += 1
+        else:
+            if refss not in diction:
+                diction[refss] = i
+                i += 1
+
+    state = list(diction.keys())
+    refs = state.copy()  # Initialize refs with the same order as state
+    positions = list(range(len(refs)))
+
+    # Build height dictionary and text state
+    height_dic = {}
+    processed_refs = set()
+    text_state = {}
+
+    for tex in doc.texts:
+        if "pictures" in tex.self_ref or "tables" in tex.self_ref:
+            continue
+        ref = tex.self_ref
+        if ref in processed_refs:
+            continue
+        processed_refs.add(ref)
+        if ref not in height_dic:
+            height_dic[ref] = round(abs(tex.prov[0].bbox.t - tex.prov[0].bbox.b), 2)
+        text_state[ref] = tex.text
+
+    # Initialize text_dic with current text content
+    text_dic = {ref: text_state.get(ref, "") for ref in refs}
+
+def draw_page_boxes(pdf_path, page_refs, page_no, dpi=150): #ok
+    doc = fitz.open(pdf_path)
     page = doc[page_no]
     pix = page.get_pixmap(dpi=dpi)
     width, height = pix.width, pix.height
-
-    # Convert to PIL Image
-    img_data = pix.tobytes("ppm")
-    image = Image.open(io.BytesIO(img_data))
-    
-    zoom = dpi / 72  # Default PDF resolution is 72 dpi
-
-    # Create matplotlib figure
+    img_bytes = pix.tobytes("ppm")
+    image = Image.open(io.BytesIO(img_bytes))
+    zoom = dpi / 72
     fig, ax = plt.subplots(figsize=(12, 10))
     ax.imshow(image, extent=[0, width, height, 0])
 
-    # Draw bounding boxes
-    for idx, item in enumerate(docling_doc.texts):
-        for prov in item.prov:
-            if prov.page_no == page_no + 1 and prov.bbox:
-                box = prov.bbox
-                x = box.l * zoom
-                y = (page.rect.height - box.t) * zoom
-                w = (box.r - box.l) * zoom
-                h = (box.t - box.b) * zoom
-
-                rect = patches.Rectangle((x, y), w, h, linewidth=2, edgecolor='red', facecolor='none')
-                ax.add_patch(rect)
-                # ax.text(x, y - 5, str(idx + 1), fontsize=12, color='red', weight='bold')
-    for item in docling_doc.pictures:
-        if item.prov and item.prov[0].page_no == page_no + 1:
-            box = item.prov[0].bbox
- 
-            # Scale PDF points to pixels
-            x = box.l * zoom
-            y = (page.rect.height - box.t) * zoom  # Invert Y-axis
-            w = (box.r - box.l) * zoom
-            h = (box.t - box.b) * zoom
- 
-            rect = patches.Rectangle(
-                (x, y), w, h,
-                linewidth=2, edgecolor='red', facecolor='none'
-            )
-            ax.add_patch(rect)
-            # ax.text(x, y - 5, item.self_ref.split("/")[-1], color='red', weight='bold')
+    def draw_items_with_position(items, item_type="text"):
+        for ref in page_refs:
+            item = next((t for t in items if t.self_ref == ref), None)
+            if item:
+                for prov in item.prov:
+                    if prov.page_no == page_no + 1:
+                        box = prov.bbox
+                        x = box.l * zoom
+                        y = (page.rect.height - box.t) * zoom
+                        w = (box.r - box.l) * zoom
+                        h = (box.t - box.b) * zoom
+                        rect = patches.Rectangle((x, y), w, h, linewidth=1,
+                                                 edgecolor="#000000", facecolor='#A2CFFE', alpha=0.3)
+                        ax.add_patch(rect)
+                        try:
+                            pos = refs.index(ref)  # Use global refs for position
+                            # ax.text(x, y - 5, str(pos), fontsize=8, color='red', ha='left', va='bottom')
+                        except ValueError:
+                            pass
+    
+    if document:
+        draw_items_with_position(document.texts, "text")
+        draw_items_with_position(document.pictures, "picture")
+        draw_items_with_position(document.tables, "table")
 
     ax.set_xlim(0, width)
     ax.set_ylim(height, 0)
-    ax.axis('off')  # Hide axes
+    ax.axis('off')
     plt.tight_layout()
     
-    # Save the annotated image
     annotated_path = ANNOTATED_IMAGES_DIR / f"annotated_page_{page_no}.png"
     plt.savefig(annotated_path, dpi=dpi, bbox_inches='tight', pad_inches=0)
     plt.clf()
     plt.close('all')
 
-# Helper to extract and save per-page images and bounding boxes
-def process_pdf(pdf_path: Path):
-    # Docling extraction
-    # pipeline_options = PdfPipelineOptions(
-    #     layout_analysis=True,
-    #     images_scale=2.0,
-    #     generate_picture_images=True,
-    #     layout_analysis_params={
-    #         "reading_order_strategy": "column",
-    #         "whitespace_threshold": 20,
-    #     }
-    # )
-    # converter = DocumentConverter(format_options={InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)})
-    converter = DocumentConverter()
-    result = converter.convert(pdf_path)
-    doc = result.document
+def pdf_to_json(pdf_path: Path, document): #ok
+    json_dic = document.export_to_dict()
+    json_out_path = OUTPUT_DIR / f"{pdf_path.stem}.json"
+    with open(json_out_path, "w", encoding="utf-8") as f:
+        json.dump(json_dic, f, indent=2, ensure_ascii=False)
+    return json_out_path
 
-    # Save per-page images and bounding boxes
+def json_loader(output_path):
+    json_format_option = FormatOption(
+        pipeline_cls=SimplePipeline,
+        backend=DoclingJSONBackend
+    )
+    converter = DocumentConverter(
+        allowed_formats=[InputFormat.JSON_DOCLING],
+        format_options={
+            InputFormat.JSON_DOCLING: json_format_option
+        }
+    )
+    converter.initialize_pipeline(InputFormat.JSON_DOCLING)
+    result1 = converter.convert(output_path)
+    doc = result1.document
+    doc_filename = f"jso2_{output_path.stem}"
+    out_path = OUTPUT_DIR / f"{doc_filename}-with-image-dummy-refs.md"
+    doc.save_as_markdown(out_path, image_mode=ImageRefMode.EMBEDDED)
+    return out_path
+
+def read_markdown_file(file_path):
+    with open(file_path, "r", encoding="utf-8") as file:
+        return file.read()
+
+def generate_and_modify_json(source_pdf_path: Path, doc):
+    global refs, text_dic, group_dic, pic_tex, table_tex
+    
+    # Create a copy of refs to work with
+    final_refs = refs.copy()
+    
+    # Remove group children, picture captions, and table captions from refs
+    # following the same logic as the working sample
+    group_lis = []
+    for i in group_dic.values():
+        for j in i:
+            group_lis.append(j)
+    
+    for i in group_lis:
+        if i in final_refs:
+            final_refs.remove(i)
+    
+    pic_text_lis = []
+    for i in pic_tex.values():
+        for j in i:
+            pic_text_lis.append(j)
+    
+    for i in pic_text_lis:
+        if i in final_refs:
+            final_refs.remove(i)
+    
+    table_text_lis = []
+    for i in table_tex.values():
+        for j in i:
+            table_text_lis.append(j)
+    
+    for i in table_text_lis:
+        if i in final_refs:
+            final_refs.remove(i)
+    
+    # Create children array with the cleaned refs
+    children = [{"$ref": r} for r in final_refs]
+    
+    # Generate JSON from document
+    output_path_json = pdf_to_json(source_pdf_path, doc)
+
+    # Load and modify the JSON
+    with open(output_path_json, "r", encoding="utf-8") as f:
+        x = json.load(f)
+
+    # Update body children with new order
+    x["body"]["children"] = children
+    
+    # Update text content with edited texts
+    for i in x.get("texts", []):
+        if i.get("self_ref") in text_dic:
+            i["text"] = text_dic[i["self_ref"]]
+
+    # Save the modified JSON
+    with open(output_path_json, "w", encoding="utf-8") as f:
+        json.dump(x, f, indent=4)
+        
+    return output_path_json
+
+def process_pdf(pdf_path: Path):
+    global document
+    
+    document = load_docling_output(pdf_path)
+    process_document_structure(document)
+    
     pdf = fitz.open(str(pdf_path))
     for page_no in range(len(pdf)):
-        # Save original page image
         page = pdf[page_no]
-        pix = page.get_pixmap(dpi=IMAGE_DPI)
+        pix = page.get_pixmap(dpi=150)
         img_path = PAGE_IMAGES_DIR / f"page_{page_no}.png"
         pix.save(str(img_path))
 
-        # Generate annotated image with bounding boxes
-        draw_page_boxes(pdf_path, doc, page_no, IMAGE_DPI)
+        page_refs = [
+            item.self_ref
+            for item in document.texts + document.pictures + document.tables
+            if item.prov and item.prov[0].page_no == page_no + 1
+        ]
+        
+        draw_page_boxes(pdf_path, page_refs, page_no, 150)
 
-        # Save bounding boxes for this page
         page_blocks = []
         
-        # Extract text blocks
-        for item in doc.texts:
-            for prov in item.prov:
-                if prov.page_no == page_no + 1 and prov.bbox:
-                    # More robust check for empty or whitespace-only text
-                    if not item.text or not item.text.strip():
-                        continue  # Skip empty text blocks
-                    
-                    bbox = prov.bbox
-                    page_blocks.append({
-                        "self_ref": item.self_ref,
-                        "type": "text",
-                        "content": item.text.strip(),
-                        "page": prov.page_no,
-                        "bbox": {
-                            "left": bbox.l,
-                            "top": bbox.t,
-                            "right": bbox.r,
-                            "bottom": bbox.b
+        for item_type in [document.texts, document.pictures, document.tables]:
+            for item in item_type:
+                for prov in item.prov:
+                    if prov.page_no == page_no + 1 and prov.bbox:
+                        if hasattr(item, 'text') and (not item.text or not item.text.strip()):
+                            continue
+                        
+                        block = {
+                            "self_ref": item.self_ref,
+                            "page": prov.page_no,
+                            "bbox": {
+                                "left": prov.bbox.l, "top": prov.bbox.t,
+                                "right": prov.bbox.r, "bottom": prov.bbox.b
+                            }
                         }
-                    })
-        
-        # Extract picture blocks with actual image data
-        for item in doc.pictures:
-            # Print the full JSON structure of the picture item to a debug file
-            try:
-                with open('debug_picture_items.json', 'a', encoding='utf-8') as debug_file:
-                    debug_file.write(json.dumps(item.__dict__, default=str, indent=2) + '\n\n')
-            except Exception as e:
-                print(f'Could not serialize picture item: {e}')
-            
-            for prov in item.prov:
-                if prov.page_no == page_no + 1 and prov.bbox:
-                    bbox = prov.bbox
-                    
-                    # Extract base64 image data from the image field
-                    image_data = None
-                    try:
-                        if hasattr(item, 'image') and hasattr(item.image, 'uri'):
-                            uri_str = str(item.image.uri)
-                            if uri_str.startswith('data:image'):
-                                image_data = uri_str
-                                print(f"Found base64 image data: {uri_str[:100]}...")
-                    except Exception as e:
-                        print(f"Error extracting image data: {e}")
-                    
-                    picture_block = {
-                        "self_ref": item.self_ref,
-                        "type": "picture",
-                        "bbox": {
-                            "left": bbox.l,
-                            "top": bbox.t,
-                            "right": bbox.r,
-                            "bottom": bbox.b
-                        },
-                        "content": image_data if image_data else "",
-                        "metadata": {
-                            "mimetype": getattr(item.image, 'mimetype', 'unknown') if hasattr(item, 'image') else 'unknown',
-                            "size": {
-                                "width": getattr(item.image, 'size', {}).width if hasattr(item, 'image') and hasattr(item.image, 'size') else 0,
-                                "height": getattr(item.image, 'size', {}).height if hasattr(item, 'image') and hasattr(item.image, 'size') else 0
-                            } if hasattr(item, 'image') else {"width": 0, "height": 0}
-                        }
-                    }
-                    
-                    # Add captions if available
-                    if hasattr(item, 'captions') and item.captions:
-                        picture_block["captions"] = [str(caption) for caption in item.captions]
-                    
-                    page_blocks.append(picture_block)
-        
-        # Extract table blocks with markdown conversion
-        for item in doc.tables:
-            # Debug: print the full table item structure
-            print(f"Table item structure: {item}")
-            print(f"Table item dir: {dir(item)}")
-            if hasattr(item, 'to_markdown'):
-                print(f"Table has to_markdown method")
-            if hasattr(item, 'df'):
-                print(f"Table has df attribute: {item.df}")
-            
-            for prov in item.prov:
-                if prov.page_no == page_no + 1 and prov.bbox:
-                    bbox = prov.bbox
-                    
-                    # Convert table to markdown format
-                    table_markdown = ""
-                    try:
-                        if hasattr(item, 'to_markdown'):
-                            table_markdown = item.to_markdown()
-                        elif hasattr(item, 'df') and item.df is not None:
-                            # If it's a pandas DataFrame, convert to markdown
-                            table_markdown = item.df.to_markdown(index=False)
-                        else:
-                            # Fallback: convert table to simple markdown
-                            table_markdown = str(item)
-                    except Exception as e:
-                        print(f"Error converting table to markdown: {e}")
-                        table_markdown = str(item)
-                    
-                    page_blocks.append({
-                        "self_ref": getattr(item, 'self_ref', f'table_{prov.page_no}_{bbox.l}_{bbox.t}'),
-                        "type": "table",
-                        "content": table_markdown,
-                        "page": prov.page_no,
-                        "bbox": {
-                            "left": bbox.l,
-                            "top": bbox.t,
-                            "right": bbox.r,
-                            "bottom": bbox.b
-                        }
-                    })
+
+                        if hasattr(item, 'text'):
+                            block["type"] = "text"
+                            block["content"] = item.text.strip()
+                        elif hasattr(item, 'image'):
+                            block["type"] = "picture"
+                            image_data = None
+                            if hasattr(item.image, 'uri') and str(item.image.uri).startswith('data:image'):
+                                image_data = str(item.image.uri)
+                            block["content"] = image_data or ""
+                        elif hasattr(item, 'to_markdown'):
+                            block["type"] = "table"
+                            block["content"] = item.to_markdown()
+                        
+                        page_blocks.append(block)
         
         with open(BOXES_DIR / f"boxes_{page_no}.json", "w", encoding="utf-8") as f:
             json.dump(page_blocks, f, indent=2)
 
-    # Save page count
     with open(OUTPUT_DIR / "pages_count.txt", "w") as f:
         f.write(str(len(pdf)))
 
 @app.post("/upload_pdf")
 async def upload_pdf(file: UploadFile = File(...)):
     with open(PDF_PATH, "wb") as buffer:
-        while chunk := await file.read(1024 * 1024):  # 1MB chunks
-            buffer.write(chunk)
+        shutil.copyfileobj(file.file, buffer)
     try:
         process_pdf(PDF_PATH)
     except Exception as e:
+        _log.exception("Docling extraction failed")
         raise HTTPException(status_code=500, detail=f"Docling extraction failed: {e}")
-    return {"message": "PDF processed and page images/bounding boxes extracted."}
+    return {"message": "PDF processed successfully."}
 
 @app.get("/pages_count")
 def get_pages_count():
@@ -280,8 +372,6 @@ def get_page_image(page_no: int):
 @app.get("/annotated_page_image/{page_no}")
 def get_annotated_page_image(page_no: int):
     img_path = ANNOTATED_IMAGES_DIR / f"annotated_page_{page_no}.png"
-    print(f"Requested annotated image: {img_path}")
-    print(f"File exists: {img_path.exists()}")
     if not img_path.exists():
         raise HTTPException(status_code=404, detail="Annotated page image not found.")
     return FileResponse(str(img_path), media_type="image/png")
@@ -295,44 +385,73 @@ def get_bounding_boxes(page_no: int):
         data = json.load(f)
     return JSONResponse(content=data)
 
-@app.post("/save_order/{page_no}")
-async def save_order(page_no: int, order: dict):
-    # Save the new order for the page
-    order_path = OUTPUT_DIR / f"reading_order_{page_no}.json"
-    with open(order_path, "w", encoding="utf-8") as f:
-        json.dump(order, f, indent=2)
-    return {"message": "Order saved."}
+@app.get("/get_reading_order")
+def get_reading_order():
+    """Get current reading order and text content"""
+    global refs, text_dic
+    return {"refs": refs, "texts": text_dic}
 
 @app.post("/save_all_orders")
-async def save_all_orders(order: dict = Body(...)):
-    # Save all page orders to a single file
+async def save_all_orders(order_data: dict = Body(...)):
+    global refs, text_dic
+    
+    # Update the reading order
+    if "order" in order_data and isinstance(order_data["order"], list):
+        refs = order_data["order"]
+    
+    # Update text content
+    if "texts" in order_data and isinstance(order_data["texts"], dict):
+        for self_ref, text_content in order_data["texts"].items():
+            text_dic[self_ref] = text_content
+
+    # Save to file for persistence
     order_path = OUTPUT_DIR / "all_reading_orders.json"
     with open(order_path, "w", encoding="utf-8") as f:
-        json.dump(order, f, indent=2)
-    return {"message": "All orders saved."}
+        json.dump({"refs": refs, "texts": text_dic}, f, indent=2)
+        
+    return {"message": "All orders and text changes saved."}
 
 @app.post("/export_markdown")
-def export_markdown(order: dict = Body(...)):
-    # Use Docling to convert the JSON order to markdown
+def export_markdown():
+    global document
+    if not document:
+        raise HTTPException(status_code=400, detail="No document processed. Please upload a PDF first.")
     try:
-        from docling.document import Document
-        # Convert the JSON order to a Docling Document
-        doc = Document.from_json(order)
-        markdown = doc.to_markdown()
-        return PlainTextResponse(markdown, media_type="text/markdown")
+        modified_json_path = generate_and_modify_json(PDF_PATH, document)
+        markdown_path = json_loader(modified_json_path)
+        markdown_content = read_markdown_file(markdown_path)
+        return PlainTextResponse(
+            markdown_content, 
+            media_type="text/markdown",
+            headers={"Content-Disposition": f"attachment; filename=export.md"}
+        )
     except Exception as e:
-        return PlainTextResponse(f"Error converting to markdown: {e}", status_code=500)
+        _log.exception("Error exporting markdown")
+        raise HTTPException(status_code=500, detail=f"Error exporting to markdown: {e}")
 
-# Path to built React app
-frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "build")
+@app.get("/export_json")
+def export_json():
+    global document
+    if not document:
+        raise HTTPException(status_code=400, detail="No document processed. Please upload a PDF first.")
+    try:
+        modified_json_path = generate_and_modify_json(PDF_PATH, document)
+        return FileResponse(
+            modified_json_path,
+            media_type="application/json",
+            filename=f"{PDF_PATH.stem}_modified.json"
+        )
+    except Exception as e:
+        _log.exception("Error exporting json")
+        raise HTTPException(status_code=500, detail=f"Error exporting to JSON: {e}")
 
-# Serve static files from the React build directory
-app.mount("/static", StaticFiles(directory=os.path.join(frontend_path, "static")), name="static")
+# Serve React App
+frontend_path = Path(__file__).parent.parent / "frontend" / "build"
+app.mount("/static", StaticFiles(directory=frontend_path / "static"), name="static")
 
-# Serve the main index.html for any other route
 @app.get("/{full_path:path}")
 async def serve_react_app(full_path: str):
-    index_path = os.path.join(frontend_path, "index.html")
-    if not os.path.exists(index_path):
+    index_path = frontend_path / "index.html"
+    if not index_path.exists():
         raise HTTPException(status_code=404, detail="index.html not found")
-    return FileResponse(index_path) 
+    return FileResponse(index_path)

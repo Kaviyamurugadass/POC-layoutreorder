@@ -35,3 +35,6 @@ hf-xet
 PyMuPDF
 matplotlib
 Pillow
+
+
+# python -m uvicorn main:app --reload 
