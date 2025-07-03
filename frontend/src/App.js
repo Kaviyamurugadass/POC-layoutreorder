@@ -61,7 +61,6 @@ function App() {
     axios.get(`${API_BASE}/bounding_boxes/${currentPage}`)
       .then(res => {
         const fetchedBoxes = res.data;
-        console.log("Bounding Boxes", res.data)
         setBoxes(fetchedBoxes);
         setOriginalBoxes(fetchedBoxes);
         // Store original boxes for this page if not already stored
@@ -267,6 +266,7 @@ function App() {
       alert('Failed to upload to Wiki.js.');
     }
   };
+  // console.log("boxes", boxes);
 
   // Navigation
   const goPrev = () => setCurrentPage((p) => Math.max(0, p - 1));

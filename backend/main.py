@@ -19,6 +19,8 @@ from docling.pipeline.simple_pipeline import SimplePipeline
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from wiki_upload import upload_markdown_to_wikijs
+import pprint
+
 
 app = FastAPI()
 
@@ -96,7 +98,8 @@ def process_document_structure(doc):
     
     for j in body_children:
         refss = j.cref
-        
+        # print("refss...................:", refss)
+
         if "groups" in refss and refss in group_dic:
             gl = group_dic[refss]
             for l in gl:
@@ -125,7 +128,11 @@ def process_document_structure(doc):
             if refss not in diction:
                 diction[refss] = i
                 i += 1
-
+      # 👉 INSERT THIS TO SEE WHAT'S INSIDE
+    print("📦 Diction mapping (cref → index):")
+    for key, value in diction.items():
+        print(f"{key} → {value}")
+        
     state = list(diction.keys())
     refs = state.copy()  # Initialize refs with the same order as state
     positions = list(range(len(refs)))
@@ -306,9 +313,15 @@ def process_pdf(pdf_path: Path):
         draw_page_boxes(pdf_path, page_refs, page_no, 150)
 
         page_blocks = []
-        
-        for item_type in [document.texts, document.pictures, document.tables]:
-            for item in item_type:
+
+        for ref in refs:  # Use the correct order from diction or refs
+            # Find the item in texts, pictures, or tables
+            item = next(
+                (x for x in (document.texts + document.pictures + document.tables) if x.self_ref == ref),
+                None
+            )
+            if item:
+                print(item.self_ref)
                 for prov in item.prov:
                     if prov.page_no == page_no + 1 and prov.bbox:
                         if hasattr(item, 'text') and (not item.text or not item.text.strip()):
@@ -482,6 +495,7 @@ def get_bounding_boxes(page_no: int):
         raise HTTPException(status_code=404, detail="Bounding boxes not found.")
     with open(box_path, "r", encoding="utf-8") as f:
         data = json.load(f)
+    # print(f"✅ Data loaded: {data}")
     return JSONResponse(content=data)
 
 @app.post("/save_all_orders")
