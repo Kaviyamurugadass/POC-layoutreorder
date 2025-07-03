@@ -1,4 +1,4 @@
-version: '3.8'
+# version: '3.8'
 
 services:
   backend:
@@ -9,7 +9,7 @@ services:
       - ./backend/output:/app/output
     environment:
       - WIKI_JS_URL=http://wikijs:3001
-      - WIKI_JS_API_TOKEN=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGkiOjIsImdycCI6MSwiaWF0IjoxNzUxNDQwNjU2LCJleHAiOjE3ODI5OTgyNTYsImF1ZCI6InVybjp3aWtpLmpzIiwiaXNzIjoidXJuOndpa2kuanMifQ.WKurWweL1iFoCAgNm5QV7MSHntyBayJd0p2a_IoJ7xAe99O3J6Pz1n3QontW3d7jYa8nP91lTYbiu8-7iMM_p3fPyxboRAqI-b15yP_Tq3AgvyhneU7wGp7RhytjWub_xL1s5u9fwBrtzp-PlA05jaXxz7pfmD--ZfOxF7ne1dqHD36pAEutdK8-Rvd8BI7yClRxCREO5pBs4JJDYO_7L-C7s8GIYvulBYASwmelPppw35Ed3MV3XFIaCOMsV4B_hIL21AMffQoIhC7Bv2UWd_3Hrtdb90N0ZlwlxbKvlxrn7xL7kD6-v7NRyoAbeDulcMrqS2Qj80ed6dwaETJs1A
+      - WIKI_JS_API_TOKEN=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGkiOjEsImdycCI6MSwiaWF0IjoxNzUxNDU1OTc3LCJleHAiOjE3ODMwMTM1NzcsImF1ZCI6InVybjp3aWtpLmpzIiwiaXNzIjoidXJuOndpa2kuanMifQ.O5WmMsFgKvC0aJ9BxgDCIUxnIrysNOx8et-L5L3PDw3U-BnztGYhq0TbHwANRmrwls5blGCN9Va2YEeZkaVVOhuGL70boQnuq_CuRiRIP0c0QTLtcNelt0qq6PWcbZvkB77IZFal9jm8eO2z8eP9lSqTNiM8jF3RGAnabXCp7SZtT3-DUAY-iVfACOdC_yjY-odH8ftq4EVHWxJxbwXvRE2VXxQg6IPAOyW5a86vdjAT6u4j5Uj0DtO4GCnFe5kSrXT7vHJ27MHjOlkN71SfC7SHgJij1ys4pWVzRZS9YpAqqGCvTRZIU_3DLU_zeghAqrGlVpfWqp8QuqOw6WUkxA
       - WIKI_JS_DEFAULT_PATH=/home
     depends_on:
       - wikijs

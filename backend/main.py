@@ -33,7 +33,7 @@ app.add_middleware(
 OUTPUT_DIR = Path("output")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-PDF_PATH = OUTPUT_DIR / "uploaded.pdf"
+PDF_PATH = None  # Will be set dynamically after upload
 PAGE_IMAGES_DIR = OUTPUT_DIR / "page_images"
 ANNOTATED_IMAGES_DIR = OUTPUT_DIR / "annotated_images"
 BOXES_DIR = OUTPUT_DIR / "boxes"
@@ -57,6 +57,7 @@ height_dic = {}
 processed_refs = set()
 text_state = {}
 text_dic = {}
+LAST_UPLOADED_PDF_NAME = None
 
 def load_docling_output(pdf_path: Path): #ok
     pipeline_options = PdfPipelineOptions(
@@ -426,8 +427,12 @@ def save_complete_edited_json_and_markdown():
 
 @app.post("/upload_pdf")
 async def upload_pdf(file: UploadFile = File(...)):
+    global LAST_UPLOADED_PDF_NAME, PDF_PATH
+    pdf_filename = Path(file.filename).name
+    PDF_PATH = OUTPUT_DIR / pdf_filename
     with open(PDF_PATH, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
+    LAST_UPLOADED_PDF_NAME = Path(file.filename).stem
     try:
         process_pdf(PDF_PATH)
     except Exception as e:
@@ -605,8 +610,10 @@ def upload_to_wiki():
     """
     Upload the latest generated markdown to Wiki.js and return the page URL.
     """
-    # Assume the markdown is saved as 'output/complete_edited_document.md'
-    markdown_path = OUTPUT_DIR / "uploaded_complete_edited.md"
+    global LAST_UPLOADED_PDF_NAME
+    if not LAST_UPLOADED_PDF_NAME:
+        return JSONResponse({"error": "No PDF uploaded yet."}, status_code=404)
+    markdown_path = OUTPUT_DIR / f"{LAST_UPLOADED_PDF_NAME}_complete_edited.md"
     if not markdown_path.exists():
         return JSONResponse({"error": "Markdown file not found. Please export markdown first."}, status_code=404)
     # Call the upload function and capture the URL
