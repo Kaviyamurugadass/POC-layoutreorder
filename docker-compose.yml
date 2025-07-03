@@ -8,9 +8,9 @@ services:
     volumes:
       - ./backend/output:/app/output
     environment:
-      - WIKI_JS_URL=http://wikijs:3001
+      - WIKI_JS_URL=http://host.docker.internal:3001
       - WIKI_JS_API_TOKEN=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGkiOjEsImdycCI6MSwiaWF0IjoxNzUxNDU1OTc3LCJleHAiOjE3ODMwMTM1NzcsImF1ZCI6InVybjp3aWtpLmpzIiwiaXNzIjoidXJuOndpa2kuanMifQ.O5WmMsFgKvC0aJ9BxgDCIUxnIrysNOx8et-L5L3PDw3U-BnztGYhq0TbHwANRmrwls5blGCN9Va2YEeZkaVVOhuGL70boQnuq_CuRiRIP0c0QTLtcNelt0qq6PWcbZvkB77IZFal9jm8eO2z8eP9lSqTNiM8jF3RGAnabXCp7SZtT3-DUAY-iVfACOdC_yjY-odH8ftq4EVHWxJxbwXvRE2VXxQg6IPAOyW5a86vdjAT6u4j5Uj0DtO4GCnFe5kSrXT7vHJ27MHjOlkN71SfC7SHgJij1ys4pWVzRZS9YpAqqGCvTRZIU_3DLU_zeghAqrGlVpfWqp8QuqOw6WUkxA
-      - WIKI_JS_DEFAULT_PATH=/home
+      - WIKI_JS_DEFAULT_PATH=/datacuration
     depends_on:
       - wikijs
 
