@@ -425,9 +425,21 @@ def save_complete_edited_json_and_markdown():
         _log.exception("Error saving complete edited JSON and markdown")
         raise HTTPException(status_code=500, detail=f"Error saving complete edited JSON and markdown: {e}")
 
+def clear_output_dir():
+    for item in OUTPUT_DIR.iterdir():
+        # Always clear these subfolders and all files
+        if item.is_dir() and item.name in ["page_images", "annotated_images", "boxes"]:
+            shutil.rmtree(item)
+            item.mkdir(exist_ok=True)
+        elif item.is_file():
+            item.unlink()
+        elif item.is_dir():
+            shutil.rmtree(item)
+
 @app.post("/upload_pdf")
 async def upload_pdf(file: UploadFile = File(...)):
     global LAST_UPLOADED_PDF_NAME, PDF_PATH
+    clear_output_dir()  # Clear output and subfolders before saving new file
     pdf_filename = Path(file.filename).name
     PDF_PATH = OUTPUT_DIR / pdf_filename
     with open(PDF_PATH, "wb") as buffer:
