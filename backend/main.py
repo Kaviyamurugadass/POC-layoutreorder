@@ -98,8 +98,7 @@ def process_document_structure(doc):
     
     for j in body_children:
         refss = j.cref
-        # print("refss...................:", refss)
-
+        
         if "groups" in refss and refss in group_dic:
             gl = group_dic[refss]
             for l in gl:
@@ -333,20 +332,17 @@ def process_pdf(pdf_path: Path):
                             "bbox": {
                                 "left": prov.bbox.l, "top": prov.bbox.t,
                                 "right": prov.bbox.r, "bottom": prov.bbox.b
-                            }
+                            },
+                            "type": getattr(item, "label", None)
                         }
-
                         if hasattr(item, 'text'):
-                            block["type"] = "text"
                             block["content"] = item.text.strip()
                         elif hasattr(item, 'image'):
-                            block["type"] = "picture"
                             image_data = None
                             if hasattr(item.image, 'uri') and str(item.image.uri).startswith('data:image'):
                                 image_data = str(item.image.uri)
                             block["content"] = image_data or ""
                         elif hasattr(item, 'to_markdown'):
-                            block["type"] = "table"
                             block["content"] = item.to_markdown()
                         
                         page_blocks.append(block)

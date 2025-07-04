@@ -33,6 +33,18 @@ const FileText = ({ className = "w-4 h-4" }) => (
   </svg>
 );
 
+const FileList = ({ className = "w-4 h-4" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M4 6h16M4 10h16M4 14h16M4 18h16M3 6v12a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2z"
+    />
+  </svg>
+);
+
+
 const Edit3 = ({ className = "w-4 h-4" }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -75,7 +87,8 @@ const blockTypeIcons = {
   text: Type,
   picture: Image,
   table: Table,
-  caption: FileText
+  caption: FileText,
+  list_item: FileList, // Using Type icon for list items as well
 };
 
 const blockTypeConfig = {
@@ -108,7 +121,14 @@ const blockTypeConfig = {
     bg: 'bg-gray-50 border-gray-200', 
     badge: 'bg-gray-100 text-gray-800',
     ring: 'ring-gray-500'
-  }
+  },
+  list_item: {
+    color: 'from-teal-500 to-teal-900', // Gradient for badge background
+    bg: 'bg-teal-50 border border-teal-200',
+    badge: 'bg-teal-100 text-teal-800',
+    ring: 'ring ring-teal-500'
+  },  
+  
 };
 
 const BlockEditor = ({
@@ -362,16 +382,6 @@ const BlockEditor = ({
       <div className="mt-2">
         {renderContent()}
       </div>
-
-      {/* Bounding Box Info */}
-      {/* {block.bbox && (
-        <div className="mt-4 px-3 py-2 bg-white/70 rounded-lg text-xs text-gray-500 font-mono">
-          <div className="flex items-center gap-4">
-            <span>Position: ({block.bbox.l}, {block.bbox.t})</span>
-            <span>Size: {block.bbox.r - block.bbox.l} × {block.bbox.b - block.bbox.t}</span>
-          </div>
-        </div>
-      )} */}
     </div>
   );
 };
