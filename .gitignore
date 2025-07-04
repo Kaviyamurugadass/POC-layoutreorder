@@ -54,4 +54,7 @@ backend/debug_picture_items.json
 backend/debug_picture_items.json
 backend/config.py
 
-wikijs-data
+/wikijs-data
+wikijs-data/wiki.db
+wiki.db
+wiki.db-journal
