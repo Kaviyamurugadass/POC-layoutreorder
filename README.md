@@ -69,24 +69,38 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
+## 🐳 Docker Commands
 
-Docker command 
-In root run this command
-Run:
-   ### docker-compose up --build
-if no code changes:
-   ### docker-compose up
+### 🚀 How to Run the Project
 
-   Frontend - http://localhost:3000/
-   Backend - http://localhost:8000/docs
-   wiki js - http://localhost:3001/a/dashboard
+In the **root directory**, run:
 
-### Install Docker & Docker compose
+- **For the first time or after code changes:**
+  ```docker-compose up --build```
 
-https://docs.docker.com/get-started/get-docker/
-https://docs.docker.com/compose/install/
+- **If there are no code changes:**
+  ```docker-compose up```
 
-Summary Table
-What to Install on Other System	Why?
-Docker ---->	To run containers
-Docker Compose ---->	To orchestrate containers
+---
+
+### 🔗 Service URLs
+
+- **Frontend:** [http://localhost:3000](http://localhost:3000)
+- **Backend (API Docs):** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Wiki.js:** [http://localhost:3001/a/dashboard](http://localhost:3001/a/dashboard)
+
+---
+
+### 📦 Install Docker & Docker Compose
+
+- [Install Docker](https://docs.docker.com/get-docker/)
+- [Install Docker Compose](https://docs.docker.com/compose/install/)
+
+---
+
+### 📋 Summary Table
+
+| What to Install   | Why?                                      |
+|-------------------|-------------------------------------------|
+| Docker            | To run containers                         |
+| Docker Compose    | To orchestrate multiple containers easily |

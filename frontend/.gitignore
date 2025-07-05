@@ -1,1 +1,4 @@
 node_modules
+.env
+wikijs-data/wiki.db
+wikijs-data/wiki.db-shm
